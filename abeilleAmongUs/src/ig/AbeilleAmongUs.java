@@ -2,11 +2,11 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Main.java to edit this template
  */
-package abeille.among.us;
+package ig;
 
 /**
  *
- * @author manal.benaissa
+ * @author himiz
  */
 public class AbeilleAmongUs {
 
