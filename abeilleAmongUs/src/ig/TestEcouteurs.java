@@ -1,4 +1,4 @@
-package EcouteursCorrection;
+package ig;
 
 import javax.swing.JFrame;
 

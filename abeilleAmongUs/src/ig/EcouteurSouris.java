@@ -1,4 +1,4 @@
-package EcouteursCorrection;
+package ig;
 
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
