@@ -13,6 +13,10 @@ public class VJoueur extends Joueur{
         super(id, nom, motDePasse); 
         this.setImposteur(false);
     }
+    
+    public VJoueur() {
+        this(0, "", "");
+    }
 
     @Override
     public void recolter() {

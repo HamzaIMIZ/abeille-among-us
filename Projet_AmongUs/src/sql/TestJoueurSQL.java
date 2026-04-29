@@ -8,14 +8,14 @@ package sql;
  *
  * @author himiz
  */
-import moteur.Joueur;
+import moteur.VJoueur;
 
 
 public class TestJoueurSQL {
 
     public static void main(String[] args) {
         // Créer un joueur en mémoire
-        Joueur j = new Joueur(0, "Alice", "secret");
+        VJoueur j = new VJoueur(0, "Alice", "secret");
         j.setScoreTotal(0);
         j.setNbFleursTotal(0);
         j.setScoreSession(0);
@@ -34,7 +34,7 @@ public class TestJoueurSQL {
         System.out.println("Joueur ajouté avec ID = " + j.getId());
 
         // Vérification : on recharge le joueur depuis la base
-        Joueur j2 = new Joueur();
+        VJoueur j2 = new VJoueur();
         j2.setId(j.getId());
         sql.voirJoueur(j2);
         
