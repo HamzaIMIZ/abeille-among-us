@@ -15,7 +15,7 @@ public class TestJoueurSQL {
 
     public static void main(String[] args) {
         // Créer un joueur en mémoire
-        Joueur j = new Joueur(0, "Alice", "secret");
+        Joueur j = new Joueur();
         j.setScoreTotal(0);
         j.setNbFleursTotal(0);
         j.setScoreSession(0);
@@ -41,7 +41,6 @@ public class TestJoueurSQL {
         System.out.println("\n=== Modification du joueur ===");
         j.setNom("TestModifModifie");
         j.setMotDePasse("nouveauMdp");
-        j.setScoreTotal(150);
         j.setNbFleursTotal(10);
         j.setScoreSession(30);
         j.setNbFleursSession(5);

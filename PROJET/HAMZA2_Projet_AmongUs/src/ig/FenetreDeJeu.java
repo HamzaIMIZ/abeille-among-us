@@ -51,11 +51,11 @@ public class FenetreDeJeu extends JFrame implements ActionListener, KeyListener 
         // Dans un vrai jeu, on afficherait une boîte de dialogue pour le pseudo.
         // Ici on choisit un nom fixe pour la démo (à changer pour chaque test).
         String pseudo = "Joueur_" + System.currentTimeMillis() % 1000; // pseudo unique à chaque lancement
-        String motDePasse = "mdp";
+        //String motDePasse = "mdp";
 
         JoueurSQL JoueurSql = new JoueurSQL();
         // Pour simplifier, on crée un nouveau joueur à chaque fois.
-        this.monCompte = new Joueur(0, pseudo, motDePasse);
+        this.monCompte = new Joueur();
         JoueurSql.creerJoueur(monCompte);   // l'ID est automatiquement généré
         System.out.println("Connecté en tant que " + monCompte.getNom() + " (ID=" + monCompte.getId() + ")");
 

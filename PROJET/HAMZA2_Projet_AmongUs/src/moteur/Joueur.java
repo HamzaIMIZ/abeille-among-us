@@ -28,10 +28,10 @@ public class Joueur {
     private boolean imposteur;
 
     // Constructeur principal
-    public Joueur(int id, String nom, String motDePasse) {
-        this.id = id;
+    public Joueur( String nom ) {
+       
         this.nom = nom;
-        this.motDePasse = motDePasse;
+        this.motDePasse = "mdp";
         this.scoreTotal = 0;
         this.nbFleursTotal = 0;
         this.scoreSession = 0;
@@ -43,7 +43,7 @@ public class Joueur {
 
     // Constructeur par défaut
     public Joueur() {
-        this(0, "", "");
+        this("DefaultName");
     }
 
     // --- Getters et Setters ---
