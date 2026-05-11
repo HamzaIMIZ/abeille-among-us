@@ -139,6 +139,9 @@ public class Carte {
     public int getTailleTuile() {
         return this.tailleTuile;
     }
-    public int getLargeurPixels() { return largeur * tailleTuile; }
-    public int getHauteurPixels() { return hauteur * tailleTuile; }
+    public int getLargeurPixels() {return largeur * tailleTuile;}
+    public int getHauteurPixels() {return hauteur * tailleTuile;}
+    
+    public int getLargeur() {return this.largeur;}
+    public int getHauteur() {return this.hauteur;}
 }
