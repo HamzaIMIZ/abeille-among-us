@@ -81,7 +81,6 @@ public class Joueur {
         return "Joueur{" +
                 "id=" + id +
                 ", nom='" + nom + '\'' +
-                ", scoreTotal=" + scoreTotal +
                 ", scoreSession=" + scoreSession +
                 ", posX=" + posX +
                 ", posY=" + posY +

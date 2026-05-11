@@ -88,20 +88,17 @@ public class JoueurSQL {
        
         try {
             PreparedStatement requete = connexion.prepareStatement(
-                "UPDATE Joueur SET nom = ?, motDePasse = ?, scoreTotal = ?, nbFleursTotal = ?, " +
-                "scoreSession = ?, nbFleursSession = ?, posX = ?, posY = ?, imposteur = ? " +
+                "UPDATE Joueur SET nom = ?, motDePasse = ? " +
+                "scoreSession = ?, posX = ?, posY = ?, imposteur = ? " +
                 "WHERE id = ?"
             );
             requete.setString(1, J.getNom());
             requete.setString(2, J.getMotDePasse());
-            requete.setInt(3, J.getScoreTotal());
-            requete.setInt(4, J.getNbFleursTotal());
-            requete.setInt(5, J.getScoreSession());
-            requete.setInt(6, J.getNbFleursSession());
-            requete.setDouble(7, J.getPosX());
-            requete.setDouble(8, J.getPosY());
-            requete.setBoolean(9, J.isImposteur());
-            requete.setLong(10, J.getId());
+            requete.setInt(3, J.getScoreSession());
+            requete.setDouble(4, J.getPosX());
+            requete.setDouble(5, J.getPosY());
+            requete.setBoolean(6, J.isImposteur());
+            requete.setLong(7, J.getId());
             
             int nb = requete.executeUpdate();
             System.out.println(nb + " joueur(s) mis à jour");
