@@ -12,8 +12,10 @@ import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.Timer;
+import moteur.Imposteur;
 import moteur.Jeu;
 import moteur.Joueur;
+import moteur.Participant;
 import sql.JoueurSQL;   
 
 
@@ -28,7 +30,7 @@ public class FenetreDeJeu extends JFrame implements ActionListener, KeyListener 
     private final int height = 480;
 
     // NOUVEAU : le compte du joueur local (pour la fermeture)
-    private Joueur monCompte;
+    private Participant monCompte;
 
     public FenetreDeJeu() {
         // Initialisation de la fenêtre 
@@ -54,9 +56,20 @@ public class FenetreDeJeu extends JFrame implements ActionListener, KeyListener 
         //String motDePasse = "mdp";
 
         JoueurSQL JoueurSql = new JoueurSQL();
-        // Pour simplifier, on crée un nouveau joueur à chaque fois.
-        this.monCompte = new Joueur();
-        JoueurSql.creerJoueur(monCompte);   // l'ID est automatiquement généré
+        
+        boolean imposteurExiste = joueurSql.existeDejaUnImposteur();
+       
+        if (!imposteurExiste) {
+            // S'il n'y en a pas, ce joueur devient l'imposteur 
+            this.monCompte = new Imposteur(0, pseudo, motDePasse);
+            System.out.println("RÔLE : Vous êtes l'UNIQUE IMPOSTEUR !");
+        } else {
+            // Sinon, c'est une abeille (joueur normal) 
+            this.monCompte = new Joueur(0, pseudo, motDePasse);
+            System.out.println("RÔLE : Vous êtes une ABEILLE.");
+        }
+        
+        JoueurSql.creerJoueur(this.monCompte);   // l'ID est automatiquement généré
         System.out.println("Connecté en tant que " + monCompte.getNom() + " (ID=" + monCompte.getId() + ")");
 
         // Création du jeu multijoueur (on passe le compte)

@@ -201,6 +201,34 @@ public class JoueurSQL {
     }
 
 
+public void setActif(int id, boolean actif) {
+    try {
+        PreparedStatement stmt = connexion.prepareStatement("UPDATE Joueur SET actif=? WHERE id=?");
+        stmt.setBoolean(1, actif);
+        stmt.setInt(2, id);
+        stmt.executeUpdate();
+        stmt.close();
+    } catch (SQLException e) { e.printStackTrace(); }
+}
+
+public boolean existeDejaUnImposteur() {
+    boolean resultat = false;
+    try {
+        // On compte les joueurs dont la colonne 'imposteur' est à 1 et qui sont 'actifs' [cite: 259]
+        PreparedStatement stmt = connexion.prepareStatement(
+            "SELECT COUNT(*) FROM Joueur WHERE imposteur = 1 AND actif = 1");
+        ResultSet rs = stmt.executeQuery();
+        if (rs.next()) {
+            // Si le compte est supérieur à 0, un imposteur est déjà en jeu
+            resultat = rs.getInt(1) > 0;
+        }
+        rs.close();
+        stmt.close();
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return resultat;
+}
    //Si tu as une autre table, tu dois créer une autre classe similaire à celle-ci ! A présent, ton collègue qui travaille sur le moteur pourra
    //facilement utiliser tes méthodes pour mettre à jour la BDD ! En utilisant les méthodes que tu as crée pour lui :)
 }

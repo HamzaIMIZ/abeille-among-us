@@ -8,13 +8,16 @@ package moteur;
  *
  * @author irachak
  */
-public class Joueur extends Participant {
-    public Joueur(int id, String nom, String motDePasse) {
-        super(id, nom, motDePasse); // Appel au constructeur de la classe de base
+public class Imposteur extends Participant {
+    public Imposteur(int id, String nom, String motDePasse) {
+         super(id, nom, motDePasse);
+         this.imposteur = true;
     }
 
+
     public void calculpoint() {
-        
+        // Au lieu de calculerPoint, on utilise la méthode cueillirFleur
+        // pour modifier directement le scoreSession de l'objet
         this.scoreSession -= 10; 
     }
 }
