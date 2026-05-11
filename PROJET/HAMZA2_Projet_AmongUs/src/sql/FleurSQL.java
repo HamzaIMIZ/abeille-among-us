@@ -79,14 +79,14 @@ public class FleurSQL {
                 "UPDATE Fleur SET type = ?, points = ?, posX = ?, posY = ?" +
                 "WHERE id = ?"
             );
-                        requete.setInt(1, J.getType());
+            requete.setInt(1, J.getType());
             requete.setInt(2, J.getPoints());
             requete.setDouble(3, J.getX());
             requete.setDouble(4, J.getY());
             requete.setLong(5, J.getId());
             
             int nb = requete.executeUpdate();
-            System.out.println(nb + " joueur(s) mis à jour");
+            System.out.println(nb + " fleur(s) mis à jour");
             requete.close();
             
         } catch (SQLException ex) {
@@ -94,25 +94,25 @@ public class FleurSQL {
         }
     }
      
-     public void supprimerJoueur(Joueur J){
+     public void supprimerFleur(Fleur J){
        
          try {
-            PreparedStatement requete = connexion.prepareStatement("DELETE FROM Joueur WHERE id = ?");
+            PreparedStatement requete = connexion.prepareStatement("DELETE FROM Fleur WHERE id = ?");
             requete.setLong(1, J.getId());
             int nb = requete.executeUpdate();
-            System.out.println(nb + " joueur(s) supprimé(s)");
+            System.out.println(nb + " fleur(s) supprimé(s)");
             requete.close();
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
     }
      
-     public void voirJoueur(Joueur J){
+     public void voirFleur(Fleur J){
        //TODO (va utiliser SELECT dans sa requête SQL)
        //Un autre exemple car je suis gentille. Là je récupère toutes les infos du joueur J, de nom J.getNom()
         try {
 
-            PreparedStatement requete = connexion.prepareStatement("SELECT * FROM Joueur WHERE id = ?");
+            PreparedStatement requete = connexion.prepareStatement("SELECT * FROM Fleur WHERE id = ?");
             requete.setInt(1, J.getId());
             System.out.println(requete);
             ResultSet resultat = requete.executeQuery();
@@ -124,22 +124,7 @@ public class FleurSQL {
             ex.printStackTrace();
         }
 
-    }
-    
-    public void mettreAJourPositionScore(int id, double x, double y, int scoreSession) {
-        try (PreparedStatement stmt = connexion.prepareStatement(
-            "UPDATE Joueur SET posX = ?, posY = ?, scoreSession = ? WHERE id = ?")) {
-          stmt.setDouble(1, x);
-          stmt.setDouble(2, y);
-          stmt.setInt(3, scoreSession);
-          stmt.setInt(4, id);
-          stmt.executeUpdate();
-        } catch (SQLException e) {
-          e.printStackTrace();
-        }
-    } 
-     
-     
+    }   
      
      
     public void closeTable(){
@@ -148,7 +133,7 @@ public class FleurSQL {
         try {
 
             this.connexion.close();
-
+            // add delete all flowers in the base de donnés here
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
@@ -157,20 +142,19 @@ public class FleurSQL {
     
  
 
-    public List<Joueur> getAutresJoueurs(int monId) {
-      List<Joueur> liste = new ArrayList<>();
+    public List<Fleur> getFleurs(int monId) {
+      List<Fleur> liste = new ArrayList<>();
     try {
         PreparedStatement stmt = connexion.prepareStatement(
             "SELECT id, nom, posX, posY, scoreSession FROM Joueur WHERE actif=1 AND id != ?");
         stmt.setInt(1, monId);
         ResultSet rs = stmt.executeQuery();
         while (rs.next()) {
-            Joueur j = new Joueur();
+            Fleur j = new Fleur();
             j.setId(rs.getInt("id"));
-            j.setNom(rs.getString("nom"));
-            j.setPosX(rs.getDouble("posX"));
-            j.setPosY(rs.getDouble("posY"));
-            j.setScoreSession(rs.getInt("scoreSession"));
+            j.setType(rs.getInt("type"));
+            j.setX(rs.getDouble("posX"));
+            j.setY(rs.getDouble("posY"));
             liste.add(j);
         }
         rs.close();

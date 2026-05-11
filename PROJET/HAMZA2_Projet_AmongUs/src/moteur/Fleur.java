@@ -54,6 +54,11 @@ public class Fleur {
         
     }
     
+        // Constructeur par défaut
+    public Fleur() {
+        this(0, 0, 0);
+    }
+    
 
     public void miseAJour() {
         
