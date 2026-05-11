@@ -42,6 +42,7 @@ public class TestJoueurSQL {
         j.setNom("TestModifModifie");
         j.setMotDePasse("nouveauMdp");
 
+
         j.setScoreSession(30);
 
         j.setScoreTotal(150);

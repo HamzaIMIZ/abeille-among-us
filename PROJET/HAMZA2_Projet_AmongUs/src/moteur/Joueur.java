@@ -29,13 +29,9 @@ public class Joueur {
         this.id = id;
         this.nom = nom;
         this.motDePasse = motDePasse;
-<<<<<<< HEAD
-     
+
         this.scoreSession = 0;
 
-=======
-        this.scoreSession = 0;
->>>>>>> 6af58d35174446e61135ed142aa83a6a61bab89b
         this.posX = 170;   // position initiale (comme dans Avatar)
         this.posY = 320;
         this.imposteur = false;
@@ -58,10 +54,7 @@ public class Joueur {
 
     public int getScoreSession() { return scoreSession; }
     public void setScoreSession(int scoreSession) { this.scoreSession = scoreSession; }
-<<<<<<< HEAD
 
-=======
->>>>>>> 6af58d35174446e61135ed142aa83a6a61bab89b
     
     public double getPosX() { return posX; }
     public void setPosX(double posX) { this.posX = posX; }
@@ -75,18 +68,12 @@ public class Joueur {
     // --- Méthodes utiles ---
     public void cueillirFleur(int points) {
         this.scoreSession += points;
-<<<<<<< HEAD
-=======
-        //this.nbFleursSession++;
->>>>>>> 6af58d35174446e61135ed142aa83a6a61bab89b
+
     }
 
     public void resetPourNouvellePartie() {
         this.scoreSession = 0;
-<<<<<<< HEAD
-=======
-        //this.nbFleursSession = 0;
->>>>>>> 6af58d35174446e61135ed142aa83a6a61bab89b
+
         this.posX = 170;
         this.posY = 320;
         this.imposteur = false;
