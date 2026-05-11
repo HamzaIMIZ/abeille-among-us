@@ -46,7 +46,7 @@ public class FleurSQL {
 
     }
     
-   public void creerJoueur(Fleur J) {
+   public void creerFleur(Fleur J) {
 
        try {
             // La table Fleur possède les colonnes :
@@ -72,24 +72,18 @@ public class FleurSQL {
         }
     }
 
-     public void modifierJoueur(Fleur J){
+     public void modifierFleur(Fleur J){
        
         try {
             PreparedStatement requete = connexion.prepareStatement(
-                "UPDATE Joueur SET nom = ?, motDePasse = ?, scoreTotal = ?, nbFleursTotal = ?, " +
-                "scoreSession = ?, nbFleursSession = ?, posX = ?, posY = ?, imposteur = ? " +
+                "UPDATE Fleur SET type = ?, points = ?, posX = ?, posY = ?" +
                 "WHERE id = ?"
             );
-            requete.setString(1, J.getNom());
-            requete.setString(2, J.getMotDePasse());
-            requete.setInt(3, J.getScoreTotal());
-            requete.setInt(4, J.getNbFleursTotal());
-            requete.setInt(5, J.getScoreSession());
-            requete.setInt(6, J.getNbFleursSession());
-            requete.setDouble(7, J.getPosX());
-            requete.setDouble(8, J.getPosY());
-            requete.setBoolean(9, J.isImposteur());
-            requete.setLong(10, J.getId());
+                        requete.setInt(1, J.getType());
+            requete.setInt(2, J.getPoints());
+            requete.setDouble(3, J.getX());
+            requete.setDouble(4, J.getY());
+            requete.setLong(5, J.getId());
             
             int nb = requete.executeUpdate();
             System.out.println(nb + " joueur(s) mis à jour");
