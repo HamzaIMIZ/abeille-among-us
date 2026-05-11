@@ -58,7 +58,7 @@ public class FleurSQL {
             // La table Fleur possède les colonnes :
             // id (auto-incrément), type, points, posX, posY,
             PreparedStatement requete = connexion.prepareStatement(
-                "INSERT INTO Joueur (type, points, posX, posY) " + "VALUES (?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+                "INSERT INTO Fleur (type, points, posX, posY) " + "VALUES (?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
             requete.setString(1, J.getNom());
             requete.setString(2, J.getMotDePasse());
             requete.setInt(3, J.getScoreTotal());
