@@ -166,17 +166,6 @@ public class FleurSQL {
     }
 
 
-public void setActif(int id, boolean actif) {
-    try {
-        PreparedStatement stmt = connexion.prepareStatement("UPDATE Joueur SET actif=? WHERE id=?");
-        stmt.setBoolean(1, actif);
-        stmt.setInt(2, id);
-        stmt.executeUpdate();
-        stmt.close();
-    } catch (SQLException e) { e.printStackTrace(); }
-}
-
-
    //Si tu as une autre table, tu dois créer une autre classe similaire à celle-ci ! A présent, ton collègue qui travaille sur le moteur pourra
    //facilement utiliser tes méthodes pour mettre à jour la BDD ! En utilisant les méthodes que tu as crée pour lui :)
 }
