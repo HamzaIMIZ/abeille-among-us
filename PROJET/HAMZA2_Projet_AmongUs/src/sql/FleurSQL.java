@@ -47,18 +47,16 @@ public class FleurSQL {
     }
     
    public void creerJoueur(Fleur J) {
-        
-       
-       
+
        try {
             // La table Fleur possède les colonnes :
             // id (auto-incrément), type, points, posX, posY,
             PreparedStatement requete = connexion.prepareStatement(
                 "INSERT INTO Fleur (type, points, posX, posY) " + "VALUES (?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
-            requete.setString(1, J.getNom());
-            requete.setString(2, J.getMotDePasse());
-            requete.setInt(3, J.getScoreTotal());
-            requete.setInt(4, J.getNbFleursTotal());
+            requete.setInt(1, J.getType());
+            requete.setInt(2, J.getPoints());
+            requete.setDouble(3, J.getX());
+            requete.setDouble(4, J.getY());
             
             int nb = requete.executeUpdate();
             System.out.println(nb + " joueur(s) ajouté(s)");
