@@ -22,9 +22,6 @@ import moteur.Fleur;
 
 public class FleurSQL {
     
-    //Ok ! L'idée c'est que dans cette classe, tu implémentes TOUTES les actions posible avec la Table Joueur (sur le serveur distant)
-    //Pour faire ça, déjà tu as besoin de pouvoir te connecter à la base de donnée, c'est pourquoi c'est judicieux de les mettre en 
-    //attributs les choses dont t'as besoin pour te connecter.
     private String adresseBase;
     private String user;
     private String motdepasse;
@@ -49,7 +46,6 @@ public class FleurSQL {
 
     }
     
-    //Je t'ai mis ici les 4 méthodes qui vont être importantes à coder, à toi de fustionner ça avec les bouts de code dans tes tests : 
    public void creerJoueur(Fleur J) {
         
        
@@ -63,11 +59,6 @@ public class FleurSQL {
             requete.setString(2, J.getMotDePasse());
             requete.setInt(3, J.getScoreTotal());
             requete.setInt(4, J.getNbFleursTotal());
-            requete.setInt(5, J.getScoreSession());
-            requete.setInt(6, J.getNbFleursSession());
-            requete.setDouble(7, J.getPosX());
-            requete.setDouble(8, J.getPosY());
-            requete.setBoolean(9, J.isImposteur());
             
             int nb = requete.executeUpdate();
             System.out.println(nb + " joueur(s) ajouté(s)");
@@ -82,11 +73,7 @@ public class FleurSQL {
             ex.printStackTrace();
         }
     }
-    
-   
-  
-   
-   
+
      public void modifierJoueur(Fleur J){
        
         try {
