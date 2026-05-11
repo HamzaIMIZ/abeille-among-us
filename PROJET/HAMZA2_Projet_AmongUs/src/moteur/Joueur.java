@@ -19,10 +19,7 @@ public class Joueur {
     private int id;
     private String nom;
     private String motDePasse;
-    private int scoreTotal;      // score cumulé sur toutes les parties
-    private int nbFleursTotal;   // nombre total de fleurs cueillies
     private int scoreSession;    // score de la partie en cours
-    private int nbFleursSession; // fleurs cueillies dans la partie en cours
     private double posX;
     private double posY;
     private boolean imposteur;
@@ -32,10 +29,7 @@ public class Joueur {
         this.id = id;
         this.nom = nom;
         this.motDePasse = motDePasse;
-        this.scoreTotal = 0;
-        this.nbFleursTotal = 0;
         this.scoreSession = 0;
-        this.nbFleursSession = 0;
         this.posX = 170;   // position initiale (comme dans Avatar)
         this.posY = 320;
         this.imposteur = false;
@@ -56,18 +50,9 @@ public class Joueur {
     public String getMotDePasse() { return motDePasse; }
     public void setMotDePasse(String motDePasse) { this.motDePasse = motDePasse; }
 
-    public int getScoreTotal() { return scoreTotal; }
-    public void setScoreTotal(int scoreTotal) { this.scoreTotal = scoreTotal; }
-
-    public int getNbFleursTotal() { return nbFleursTotal; }
-    public void setNbFleursTotal(int nbFleursTotal) { this.nbFleursTotal = nbFleursTotal; }
-
     public int getScoreSession() { return scoreSession; }
     public void setScoreSession(int scoreSession) { this.scoreSession = scoreSession; }
-
-    public int getNbFleursSession() { return nbFleursSession; }
-    public void setNbFleursSession(int nbFleursSession) { this.nbFleursSession = nbFleursSession; }
-
+    
     public double getPosX() { return posX; }
     public void setPosX(double posX) { this.posX = posX; }
 
@@ -80,12 +65,12 @@ public class Joueur {
     // --- Méthodes utiles ---
     public void cueillirFleur(int points) {
         this.scoreSession += points;
-        this.nbFleursSession++;
+        //this.nbFleursSession++;
     }
 
     public void resetPourNouvellePartie() {
         this.scoreSession = 0;
-        this.nbFleursSession = 0;
+        //this.nbFleursSession = 0;
         this.posX = 170;
         this.posY = 320;
         this.imposteur = false;
