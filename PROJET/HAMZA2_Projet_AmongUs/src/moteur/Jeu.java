@@ -188,7 +188,6 @@ public class Jeu {
         if (timerSync != null && timerSync.isRunning()) {
             timerSync.stop();
         }
-        JoueurSql.setActif(monJoueurId, false);
         JoueurSql.closeTable();
     }
 
