@@ -123,6 +123,19 @@ public class Carte {
         return this.rooms;
     }
 
+    public int[][] getBackground() {
+        return this.background;
+    }
+
+    public int[][] getVeget() {
+        return this.veget;
+    }
+
+    public int[][] getVeg2() {
+        return this.veg2;
+    }
+
+
     public int getTailleTuile() {
         return this.tailleTuile;
     }

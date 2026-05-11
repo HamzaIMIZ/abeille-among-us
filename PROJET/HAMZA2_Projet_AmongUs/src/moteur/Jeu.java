@@ -98,6 +98,9 @@ public class Jeu {
             fleur.relancer();
         }
         this.camera.centrerSur(avatar.getX(), avatar.getY(), LARGEUR_CARTE, HAUTEUR_CARTE);
+        
+        
+        
     }
 
     public void rendu(Graphics2D contexte) {
