@@ -18,8 +18,7 @@ import javax.imageio.ImageIO;
  *
  * @author guillaume.laurent
  */
-    
-    public class Avatar {
+public class Avatar {
 
     protected BufferedImage sprite;
     protected double x, y;
@@ -27,18 +26,14 @@ import javax.imageio.ImageIO;
     private int largeurCarte;
     private int hauteurCarte;
     private Joueur monJoueur; // référence vers l'objet Joueur (pour la synchro BDD)
-
-    // Constructeur mono‑joueur (peut être supprimé)
-    public Avatar(int largeurCarte, int hauteurCarte) {
-        this(largeurCarte, hauteurCarte, null);
-    }
+    private boolean regardeADroite = false;
 
     // Constructeur multijoueur
     public Avatar(int largeurCarte, int hauteurCarte, Joueur j) {
         this.largeurCarte = largeurCarte;
         this.hauteurCarte = hauteurCarte;
         this.monJoueur = j;
-        
+
         if (j != null) {
             this.x = j.getPosX();
             this.y = j.getPosY();
@@ -47,7 +42,7 @@ import javax.imageio.ImageIO;
             this.y = 320;
         }
 
-        int avatar_size = 25;
+        int avatar_size = 20;
         try {
             BufferedImage imageOriginale = ImageIO.read(getClass().getResource("../resources/bee.png"));
             this.sprite = new BufferedImage(avatar_size, avatar_size, BufferedImage.TYPE_INT_ARGB);
@@ -65,44 +60,109 @@ import javax.imageio.ImageIO;
     }
 
     public void miseAJour() {
-        if (this.toucheGauche) { x -= 10; }
-        if (this.toucheDroite) { x += 10; }
-        if (this.toucheUp) { y -= 10; }
-        if (this.toucheDown) { y += 10; }
+        if (this.toucheGauche) {
+            x -= 5;
+            regardeADroite = false; // Il va à gauche, pas besoin de miroir
+        }
+        if (this.toucheDroite) {
+            x += 5;
+            regardeADroite = true; // Il va à droite, on va activer le miroir
+        }
+        if (this.toucheGauche) {
+            x -= 10;
+        }
+        if (this.toucheDroite) {
+            x += 10;
+        }
+        if (this.toucheUp) {
+            y -= 10;
+        }
+        if (this.toucheDown) {
+            y += 10;
+        }
 
         // Collisions avec les bords de la carte
-        if (x > largeurCarte - sprite.getWidth()) { x = largeurCarte - sprite.getWidth(); }
-        if (x < 0) { x = 0; }
-        if (y > hauteurCarte - sprite.getHeight()) { y = hauteurCarte - sprite.getHeight(); }
-        if (y < 0) { y = 0; }
+        if (x > largeurCarte - sprite.getWidth()) {
+            x = largeurCarte - sprite.getWidth();
+        }
+        if (x < 0) {
+            x = 0;
+        }
+        if (y > hauteurCarte - sprite.getHeight()) {
+            y = hauteurCarte - sprite.getHeight();
+        }
+        if (y < 0) {
+            y = 0;
+        }
 
         // Synchronisation avec l'objet Joueur (pour la BDD)
         if (monJoueur != null) {
             monJoueur.setPosX(x);
             monJoueur.setPosY(y);
-        }    
-        
-        
+        }
+
     }
 
     public void rendu(Graphics2D contexte, Camera camera) {
-        contexte.drawImage(this.sprite, (int) (x - camera.getX()), (int) (y - camera.getY()), null);
+        int drawX = (int) (x - camera.getX());
+        int drawY = (int) (y - camera.getY());
+        int w = 25; // Largeur de ton sprite
+        int h = 25; // Hauteur de ton sprite
+
+        if (regardeADroite) {
+            // EFFET MIROIR : On dessine l'image de droite à gauche
+            contexte.drawImage(sprite,
+                    drawX, drawY, drawX + w, drawY + h, // Destination
+                    w, 0, 0, h, // Source (Inversée : w vers 0)
+                    null);
+        } else {
+            // DESSIN NORMAL (Regarde à gauche par défaut)
+            contexte.drawImage(sprite, drawX, drawY, null);
+        }
     }
 
     // Getters / setters pour les touches
-    public void setToucheGauche(boolean etat) { this.toucheGauche = etat; }
-    public void setToucheDroite(boolean etat) { this.toucheDroite = etat; }
-    public void setToucheHaut(boolean b) { this.toucheUp = b; }
-    public void setToucheBas(boolean b) { this.toucheDown = b; }
+    public void setToucheGauche(boolean etat) {
+        this.toucheGauche = etat;
+    }
 
-    public double getX() { return x; }
-    public double getY() { return y; }
-    public void setX(double x) { this.x = x; }
-    public void setY(double y) { this.y = y; }
-    
-    public double getLargeur() { return sprite.getHeight(); }
-    public double getHauteur() { return sprite.getWidth(); }
+    public void setToucheDroite(boolean etat) {
+        this.toucheDroite = etat;
+    }
 
-    public Joueur getJoueur() { return monJoueur; }
+    public void setToucheHaut(boolean b) {
+        this.toucheUp = b;
+    }
+
+    public void setToucheBas(boolean b) {
+        this.toucheDown = b;
+    }
+
+    public double getX() {
+        return x;
+    }
+
+    public double getY() {
+        return y;
+    }
+
+    public void setX(double x) {
+        this.x = x;
+    }
+
+    public void setY(double y) {
+        this.y = y;
+    }
+
+    public double getLargeur() {
+        return sprite.getHeight();
+    }
+
+    public double getHauteur() {
+        return sprite.getWidth();
+    }
+
+    public Joueur getJoueur() {
+        return monJoueur;
+    }
 }
-
