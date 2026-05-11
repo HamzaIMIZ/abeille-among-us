@@ -19,6 +19,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import moteur.Participant;
 
 public class JoueurSQL {
     
@@ -50,7 +51,7 @@ public class JoueurSQL {
     }
     
     //Je t'ai mis ici les 4 méthodes qui vont être importantes à coder, à toi de fustionner ça avec les bouts de code dans tes tests : 
-   public void creerJoueur(Joueur J) {
+   public void creerJoueur(Participant J) {
         
        
        
@@ -176,15 +177,15 @@ public class JoueurSQL {
     
  
 
-    public List<Joueur> getAutresJoueurs(int monId) {
-      List<Joueur> liste = new ArrayList<>();
+    public List<Participant> getAutresJoueurs(int monId) {
+      List<Participant> liste = new ArrayList<>();
     try {
         PreparedStatement stmt = connexion.prepareStatement(
             "SELECT id, nom, posX, posY, scoreSession FROM Joueur WHERE id != ?");
         stmt.setInt(1, monId);
         ResultSet rs = stmt.executeQuery();
         while (rs.next()) {
-            Joueur j = new Joueur();
+            Participant j = new Participant();
             j.setId(rs.getInt("id"));
             j.setNom(rs.getString("nom"));
             j.setPosX(rs.getDouble("posX"));

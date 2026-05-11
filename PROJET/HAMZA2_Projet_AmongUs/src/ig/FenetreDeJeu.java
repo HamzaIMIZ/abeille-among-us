@@ -57,15 +57,15 @@ public class FenetreDeJeu extends JFrame implements ActionListener, KeyListener 
 
         JoueurSQL JoueurSql = new JoueurSQL();
         
-        boolean imposteurExiste = joueurSql.existeDejaUnImposteur();
+        boolean imposteurExiste = JoueurSql.existeDejaUnImposteur();
        
         if (!imposteurExiste) {
             // S'il n'y en a pas, ce joueur devient l'imposteur 
-            this.monCompte = new Imposteur(0, pseudo, motDePasse);
+            this.monCompte = new Imposteur(0, pseudo, "mdp");// to change later mdp as a variable name 
             System.out.println("RÔLE : Vous êtes l'UNIQUE IMPOSTEUR !");
         } else {
             // Sinon, c'est une abeille (joueur normal) 
-            this.monCompte = new Joueur(0, pseudo, motDePasse);
+            this.monCompte = new Joueur(0, pseudo, "mdp"); // to change later mdp as a variable name 
             System.out.println("RÔLE : Vous êtes une ABEILLE.");
         }
         

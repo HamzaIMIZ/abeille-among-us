@@ -29,13 +29,13 @@ public class Jeu {
     private final int LARGEUR_ECRAN;
     private final int HAUTEUR_ECRAN;
 
-    private List<Joueur> autresJoueurs;   // liste des joueurs distants (données lues en BDD)
+    private List<Participant> autresJoueurs;   // liste des joueurs distants (données lues en BDD)
     private JoueurSQL JoueurSql;                // accès à la base de données
     private Timer timerSync;              // timer pour la synchronisation périodique
     private int monJoueurId;             // identifiant du joueur local dans la BDD
     private BufferedImage spriteAutreJoueur; // image utilisée pour dessiner les autres joueurs
 
-    public Jeu(int largeurEcran, int hauteurEcran, Joueur monCompte) {
+    public Jeu(int largeurEcran, int hauteurEcran, Participant monCompte) {
         this.LARGEUR_ECRAN = largeurEcran;
         this.HAUTEUR_ECRAN = hauteurEcran;
         this.monJoueurId = monCompte.getId();
@@ -69,7 +69,7 @@ public class Jeu {
             // 1. Envoyer notre position et notre score dans la BDD
             JoueurSql.mettreAJourPositionScore(monJoueurId, avatar.getX(), avatar.getY(), this.score);
             // 2. Récupérer la liste des autres joueurs actifs
-            List<Joueur> tous = JoueurSql.getAutresJoueurs(monJoueurId);
+            List<Participant> tous = JoueurSql.getAutresJoueurs(monJoueurId);
             autresJoueurs.clear();
             autresJoueurs.addAll(tous);
         });
@@ -113,7 +113,7 @@ public class Jeu {
         this.fleur.rendu(contexte, camera);
 
         // NOUVEAU : dessin des autres joueurs (leurs avatars)
-        for (Joueur autre : autresJoueurs) {
+        for (Participant autre : autresJoueurs) {
             int screenX = (int) (autre.getPosX() - camera.getX());
             int screenY = (int) (autre.getPosY() - camera.getY());
             contexte.drawImage(this.spriteAutreJoueur, screenX, screenY, null);

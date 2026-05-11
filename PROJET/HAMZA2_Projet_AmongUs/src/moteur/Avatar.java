@@ -25,11 +25,11 @@ public class Avatar {
     private boolean toucheGauche, toucheDroite, toucheUp, toucheDown;
     private int largeurCarte;
     private int hauteurCarte;
-    private Joueur monJoueur; // référence vers l'objet Joueur (pour la synchro BDD)
+    private Participant monJoueur; // référence vers l'objet Joueur (pour la synchro BDD)
     private boolean regardeADroite = false;
 
     // Constructeur multijoueur
-    public Avatar(int largeurCarte, int hauteurCarte, Joueur j) {
+    public Avatar(int largeurCarte, int hauteurCarte, Participant j) {
         this.largeurCarte = largeurCarte;
         this.hauteurCarte = hauteurCarte;
         this.monJoueur = j;
@@ -162,7 +162,7 @@ public class Avatar {
         return sprite.getWidth();
     }
 
-    public Joueur getJoueur() {
+    public Participant getJoueur() {
         return monJoueur;
     }
 }
