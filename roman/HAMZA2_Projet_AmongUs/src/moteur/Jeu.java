@@ -102,7 +102,7 @@ public class Jeu {
 
     public void rendu(Graphics2D contexte) {
         // Fond noir et dessin de la map (inchangé)
-        contexte.setColor(java.awt.Color.BLACK);
+        contexte.setColor(java.awt.Color.WHITE);
         contexte.fillRect(0, 0, LARGEUR_ECRAN, HAUTEUR_ECRAN);
         contexte.translate((int) -camera.getX(), (int) -camera.getY());
         this.carte.rendu(contexte);
@@ -116,7 +116,7 @@ public class Jeu {
             int screenX = (int) (autre.getPosX() - camera.getX());
             int screenY = (int) (autre.getPosY() - camera.getY());
             contexte.drawImage(this.spriteAutreJoueur, screenX, screenY, null);
-            contexte.setColor(java.awt.Color.WHITE);
+            contexte.setColor(java.awt.Color.BLACK);
             contexte.drawString(autre.getNom(), screenX, screenY - 5);
         }
 
