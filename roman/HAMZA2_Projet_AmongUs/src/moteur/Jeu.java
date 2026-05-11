@@ -116,7 +116,7 @@ public class Jeu {
             int screenX = (int) (autre.getPosX() - camera.getX());
             int screenY = (int) (autre.getPosY() - camera.getY());
             contexte.drawImage(this.spriteAutreJoueur, screenX, screenY, null);
-            contexte.setColor(java.awt.Color.BLACK);
+            contexte.setColor(java.awt.Color.WHITE);
             contexte.drawString(autre.getNom(), screenX, screenY - 5);
         }
 
@@ -124,7 +124,7 @@ public class Jeu {
         this.avatar.rendu(contexte, camera);
 
         // Affichage du score (inchangé)
-        contexte.setColor(java.awt.Color.WHITE);
+        contexte.setColor(java.awt.Color.BLACK);
         contexte.drawString("Score : " + this.score, 10, 20);
     }
 
