@@ -5,6 +5,7 @@
  */
 package moteur;
 
+import ig.Carte;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -68,9 +69,63 @@ public class Fleur {
         contexte.drawImage(this.sprite, (int) (x - camera.getX()), (int) (y - camera.getY()), null);
     }
     
-    public void relancer() {
-        this.x = 15 + Math.random() * 330;
-        this.y = 0;
+    public void relancer(Carte carte) {
+        int attempts = 0;
+        boolean positionTrouvee = false;
+
+        while (!positionTrouvee && attempts < 100) {
+            // Random position in the map
+            double testX = Math.random() * carte.getLargeur() * carte.getTailleTuile();
+            double testY = Math.random() * carte.getHauteur() * carte.getTailleTuile();
+
+            if (estPositionValide(testX, testY, carte)) {// Check if this position is valid
+                this.x = testX;
+                this.y = testY;
+                positionTrouvee = true;
+            }
+            attempts++;
+        }
+
+        // If no valid position found after 100 tries, place at default position
+        if (!positionTrouvee) {
+            this.x = 200;
+            this.y = 200;
+        }
+    }
+    
+    
+    private boolean estPositionValide(double posX, double posY, Carte carte) {
+        int tailleTuile = carte.getTailleTuile();
+        int tileX = (int) posX / tailleTuile;
+        int tileY = (int) posY / tailleTuile;
+
+        // Check bounds
+        if (tileX < 0 || tileX >= carte.getLargeur() || tileY < 0 || tileY >= carte.getHauteur()) {
+            return false;
+        }
+
+        int[][] rooms = carte.getRooms();
+        int[][] background = carte.getBackground();
+        int[][] veget = carte.getVeget();
+        int[][] veg2 = carte.getVeg2();
+
+        // Must NOT be on a wall (rooms must be -1)
+        if (rooms != null && rooms[tileY][tileX] != -1) {
+            return false; // There's a wall here
+        }
+
+        // Must be on ground (at least one of background, veget, or veg2 is not -1)
+        boolean surTerrain = false;
+        if (background != null && background[tileY][tileX] != -1) {
+            surTerrain = true;
+        }
+        if (veget != null && veget[tileY][tileX] != -1) {
+            surTerrain = true;
+        }
+        if (veg2 != null && veg2[tileY][tileX] != -1) {
+            surTerrain = true;
+        }
+        return surTerrain;
     }
 
     
