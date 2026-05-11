@@ -38,7 +38,14 @@ public class TestJoueurSQL {
         System.out.println("\n=== Modification du joueur ===");
         j.setNom("TestModifModifie");
         j.setMotDePasse("nouveauMdp");
+<<<<<<< HEAD
         j.setScoreSession(30);
+=======
+        
+        
+        j.setScoreSession(30);
+        
+>>>>>>> 6af58d35174446e61135ed142aa83a6a61bab89b
         j.setPosX(500);
         j.setPosY(600);
         j.setImposteur(true);

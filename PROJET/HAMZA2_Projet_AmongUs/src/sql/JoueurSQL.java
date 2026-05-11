@@ -83,16 +83,16 @@ public class JoueurSQL {
             ex.printStackTrace();
         }
     }
-    
-   
-  
-   
-   
+
      public void modifierJoueur(Joueur J){
        
         try {
             PreparedStatement requete = connexion.prepareStatement(
+<<<<<<< HEAD
                 "UPDATE Joueur SET nom = ?, motDePasse = ?, " +
+=======
+                "UPDATE Joueur SET nom = ?, motDePasse = ? " +
+>>>>>>> 6af58d35174446e61135ed142aa83a6a61bab89b
                 "scoreSession = ?, posX = ?, posY = ?, imposteur = ? " +
                 "WHERE id = ?"
             );
@@ -102,7 +102,11 @@ public class JoueurSQL {
             requete.setDouble(4, J.getPosX());
             requete.setDouble(5, J.getPosY());
             requete.setBoolean(6, J.isImposteur());
+<<<<<<< HEAD
             requete.setInt(7, J.getId());
+=======
+            requete.setLong(7, J.getId());
+>>>>>>> 6af58d35174446e61135ed142aa83a6a61bab89b
             
             int nb = requete.executeUpdate();
             System.out.println(nb + " joueur(s) mis à jour");
