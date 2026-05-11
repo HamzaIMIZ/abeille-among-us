@@ -95,7 +95,7 @@ public class Jeu {
         this.fleur.miseAJour();       // mise à jour de la fleur (si elle bouge)
         if (collisionEntreAvatarEtFleur()) {
             this.score++;
-            fleur.relancer(carte);
+            fleur.relancer();
         }
         this.camera.centrerSur(avatar.getX(), avatar.getY(), LARGEUR_CARTE, HAUTEUR_CARTE);
         
