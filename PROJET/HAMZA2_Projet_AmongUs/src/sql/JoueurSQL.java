@@ -123,7 +123,7 @@ public class JoueurSQL {
 
         try {
             PreparedStatement requete = connexion.prepareStatement("DELETE FROM Joueur WHERE id = ?");
-            requete.setLong(1, id);
+            requete.setInt(1, id);
             int nb = requete.executeUpdate();
             System.out.println(nb + " joueur(s) supprimé(s)");
             requete.close();
