@@ -87,7 +87,7 @@ public class FleurSQL {
   
    
    
-     public void modifierJoueur(Joueur J){
+     public void modifierJoueur(Fleur J){
        
         try {
             PreparedStatement requete = connexion.prepareStatement(
