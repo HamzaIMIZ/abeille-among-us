@@ -119,18 +119,19 @@ public class JoueurSQL {
         }
     }
      
-     public void supprimerJoueur(Joueur J){
-       
-         try {
+      public void supprimerJoueur(int id) {
+
+        try {
             PreparedStatement requete = connexion.prepareStatement("DELETE FROM Joueur WHERE id = ?");
-            requete.setLong(1, J.getId());
+            requete.setLong(1, id);
             int nb = requete.executeUpdate();
             System.out.println(nb + " joueur(s) supprimé(s)");
             requete.close();
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
-    }
+     }
+
      
      public void voirJoueur(Joueur J){
        //TODO (va utiliser SELECT dans sa requête SQL)
