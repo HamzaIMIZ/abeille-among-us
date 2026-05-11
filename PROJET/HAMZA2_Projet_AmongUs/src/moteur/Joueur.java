@@ -28,7 +28,7 @@ public class Joueur {
     public Joueur( String nom ) {
        
         this.nom = nom;
-        this.motDePasse = motDePasse;
+        this.motDePasse = "mdp";
 
         this.scoreSession = 0;
 
