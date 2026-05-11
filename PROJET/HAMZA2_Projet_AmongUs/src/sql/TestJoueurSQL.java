@@ -15,7 +15,7 @@ public class TestJoueurSQL {
 
     public static void main(String[] args) {
         // Créer un joueur en mémoire
-        Joueur j = new Joueur(0, "Alice", "secret");
+        Joueur j = new Joueur();
         //j.setScoreTotal(0);
         //j.setNbFleursTotal(0);
         j.setScoreSession(0);
