@@ -59,19 +59,16 @@ public class JoueurSQL {
             // id (auto-incrément), nom, motDePasse, scoreTotal, nbFleursTotal,
             // scoreSession, nbFleursSession, posX, posY, imposteur
             PreparedStatement requete = connexion.prepareStatement(
-                "INSERT INTO Joueur (nom, motDePasse, scoreTotal, nbFleursTotal, scoreSession, nbFleursSession, posX, posY, imposteur) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "INSERT INTO Joueur (nom, motDePasse, scoreSession, posX, posY, imposteur) " +
+                "VALUES (?, ?, ?, ?, ?, ?)",
                 Statement.RETURN_GENERATED_KEYS
             );
             requete.setString(1, J.getNom());
             requete.setString(2, J.getMotDePasse());
-            requete.setInt(3, J.getScoreTotal());
-            requete.setInt(4, J.getNbFleursTotal());
-            requete.setInt(5, J.getScoreSession());
-            requete.setInt(6, J.getNbFleursSession());
-            requete.setDouble(7, J.getPosX());
-            requete.setDouble(8, J.getPosY());
-            requete.setBoolean(9, J.isImposteur());
+            requete.setInt(3, J.getScoreSession());
+            requete.setDouble(4, J.getPosX());
+            requete.setDouble(5, J.getPosY());
+            requete.setBoolean(6, J.isImposteur());
             
             int nb = requete.executeUpdate();
             System.out.println(nb + " joueur(s) ajouté(s)");
@@ -86,11 +83,7 @@ public class JoueurSQL {
             ex.printStackTrace();
         }
     }
-    
-   
-  
-   
-   
+
      public void modifierJoueur(Joueur J){
        
         try {
