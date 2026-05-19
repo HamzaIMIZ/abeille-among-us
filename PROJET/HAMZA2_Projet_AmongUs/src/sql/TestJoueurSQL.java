@@ -9,13 +9,14 @@ package sql;
  * @author himiz
  */
 import moteur.Joueur;
+import moteur.Participant;
 
 
 public class TestJoueurSQL {
 
     public static void main(String[] args) {
-        // Créer un joueur en mémoire
-        Joueur j = new Joueur();
+        // Créer un Participant en mémoire
+        Participant j = new Participant();
         //j.setScoreTotal(0);
         //j.setNbFleursTotal(0);
     
@@ -29,18 +30,18 @@ public class TestJoueurSQL {
         // Connexion à la base
         JoueurSQL sql = new JoueurSQL();
 
-        // Insérer le joueur
-        sql.creerJoueur(j);
+        // Insérer le Participant
+        sql.creerParticipant(j);
 
         // Afficher l'ID généré
-        System.out.println("Joueur ajouté avec ID = " + j.getId());
+        System.out.println("Participant ajouté avec ID = " + j.getId());
 
-        // Vérification : on recharge le joueur depuis la base
-        Joueur j2 = new Joueur();
+        // Vérification : on recharge le Participant depuis la base
+        Participant j2 = new Participant();
         j2.setId(j.getId());
-        sql.voirJoueur(j2);
+        sql.voirParticipant(j2);
         
-        System.out.println("\n=== Modification du joueur ===");
+        System.out.println("\n=== Modification du Participant ===");
         j.setNom("TestModifModifie");
         j.setMotDePasse("nouveauMdp");
 
@@ -55,9 +56,9 @@ public class TestJoueurSQL {
         j.setPosX(500);
         j.setPosY(600);
         j.setImposteur(true);
-        sql.modifierJoueur(j);
+        sql.modifierParticipant(j);
         System.out.println("Modification effectuée.");
-        sql.voirJoueur(j);
+        sql.voirParticipant(j);
         // Fermeture
         sql.closeTable();
     }

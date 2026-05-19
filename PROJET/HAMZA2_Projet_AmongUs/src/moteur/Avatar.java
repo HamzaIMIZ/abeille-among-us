@@ -25,14 +25,14 @@ public class Avatar {
     private boolean toucheGauche, toucheDroite, toucheUp, toucheDown;
     private int largeurCarte;
     private int hauteurCarte;
-    private Joueur monJoueur; // référence vers l'objet Joueur (pour la synchro BDD)
+    private Participant monParticipant; // référence vers l'objet Participant (pour la synchro BDD)
     private boolean regardeADroite = false;
 
     // Constructeur multijoueur
-    public Avatar(int largeurCarte, int hauteurCarte, Joueur j) {
+    public Avatar(int largeurCarte, int hauteurCarte, Participant j) {
         this.largeurCarte = largeurCarte;
         this.hauteurCarte = hauteurCarte;
-        this.monJoueur = j;
+        this.monParticipant = j;
 
         if (j != null) {
             this.x = j.getPosX();
@@ -95,10 +95,10 @@ public class Avatar {
             y = 0;
         }
 
-        // Synchronisation avec l'objet Joueur (pour la BDD)
-        if (monJoueur != null) {
-            monJoueur.setPosX(x);
-            monJoueur.setPosY(y);
+        // Synchronisation avec l'objet Participant (pour la BDD)
+        if (monParticipant!= null) {
+            monParticipant.setPosX(x);
+            monParticipant.setPosY(y);
         }
 
     }
@@ -162,7 +162,7 @@ public class Avatar {
         return sprite.getWidth();
     }
 
-    public Joueur getJoueur() {
-        return monJoueur;
+    public Participant getParticipant() {
+        return monParticipant;
     }
 }

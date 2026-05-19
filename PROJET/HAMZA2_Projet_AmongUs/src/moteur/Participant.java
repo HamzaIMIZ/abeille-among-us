@@ -39,6 +39,10 @@ public class Participant {
     public Participant() {
         this(0, "", "");
     }
+     public Participant(String nom) {
+        this.nom = nom;
+    }
+     
 
     // --- Getters et Setters ---
     public int getId() { return id; }
@@ -63,7 +67,10 @@ public class Participant {
 
     public boolean isImposteur() { return imposteur; }
     public void setImposteur(boolean imposteur) { this.imposteur = imposteur; }
-
+    
+    public void calculpoint() {
+        
+    }
   
     public void resetPourNouvellePartie() {
         this.scoreSession = 0;
@@ -71,6 +78,7 @@ public class Participant {
         this.posY = 320;
         this.imposteur = false;
     }
+    
 
     @Override
     public String toString() {

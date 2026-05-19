@@ -52,24 +52,24 @@ public class FenetreDeJeu extends JFrame implements ActionListener, KeyListener 
         // MULTIJOUEUR : création ou récupération du compte
         // Dans un vrai jeu, on afficherait une boîte de dialogue pour le pseudo.
         // Ici on choisit un nom fixe pour la démo (à changer pour chaque test).
-        String pseudo = "Joueur_" + System.currentTimeMillis() % 1000; // pseudo unique à chaque lancement
-        //String motDePasse = "mdp";
+        String pseudo = "Participant_" + System.currentTimeMillis() % 1000; // pseudo unique à chaque lancement
+        String motDePasse = "mdp";
 
         JoueurSQL JoueurSql = new JoueurSQL();
         
-        boolean imposteurExiste = joueurSql.existeDejaUnImposteur();
+        boolean imposteurExiste = JoueurSql.existeDejaUnImposteur();
        
         if (!imposteurExiste) {
             // S'il n'y en a pas, ce joueur devient l'imposteur 
-            this.monCompte = new Imposteur(0, pseudo, motDePasse);
+            this.monCompte = new Imposteur(0, pseudo, motDePasse); // we need to declare the variable mot de passe before
             System.out.println("RÔLE : Vous êtes l'UNIQUE IMPOSTEUR !");
         } else {
             // Sinon, c'est une abeille (joueur normal) 
-            this.monCompte = new Joueur(0, pseudo, motDePasse);
+            this.monCompte = new Joueur(0, pseudo, motDePasse);// we need to declare the variable mot de passe before
             System.out.println("RÔLE : Vous êtes une ABEILLE.");
         }
         
-        JoueurSql.creerJoueur(this.monCompte);   // l'ID est automatiquement généré
+        JoueurSql.creerParticipant(this.monCompte);   // l'ID est automatiquement généré
         System.out.println("Connecté en tant que " + monCompte.getNom() + " (ID=" + monCompte.getId() + ")");
 
         // Création du jeu multijoueur (on passe le compte)

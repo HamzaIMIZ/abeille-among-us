@@ -14,6 +14,7 @@ import java.sql.SQLException;
 import javax.swing.JOptionPane;
 import sql.JoueurSQL;
 import moteur.Joueur;
+import moteur.Participant;
 
 /**
  *
@@ -93,9 +94,9 @@ public class Welcome extends javax.swing.JFrame {
     String ID = JOptionPane.showInputDialog(null, "Join your friends with a party ID!");
     if (ID!=null) {
     System.out.println("party ID" + ID);
-    Joueur j= new Joueur(name);
+    Participant j= new Participant(name);
     JoueurSQL J= new JoueurSQL();
-    J.creerJoueur(j);
+    J.creerParticipant(j);
     
             }
     }//GEN-LAST:event_jButton1ActionPerformed

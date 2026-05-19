@@ -59,7 +59,7 @@ public class FleurSQL {
             requete.setDouble(4, J.getY());
             
             int nb = requete.executeUpdate();
-            System.out.println(nb + " joueur(s) ajouté(s)");
+            System.out.println(nb + " Participant(s) ajouté(s)");
             
             // Récupérer l'ID généré automatiquement
             ResultSet generatedKeys = requete.getGeneratedKeys();
@@ -109,7 +109,7 @@ public class FleurSQL {
      
      public void voirFleur(Fleur J){
        //TODO (va utiliser SELECT dans sa requête SQL)
-       //Un autre exemple car je suis gentille. Là je récupère toutes les infos du joueur J, de nom J.getNom()
+       //Un autre exemple car je suis gentille. Là je récupère toutes les infos du Participant J, de nom J.getNom()
         try {
 
             PreparedStatement requete = connexion.prepareStatement("SELECT * FROM Fleur WHERE id = ?");
@@ -128,7 +128,7 @@ public class FleurSQL {
      
      
     public void closeTable(){
-       //On a lancé la connexion dans le Constructeur, il faut fermer donc la connexion quand tout est fini. Dans le jeu, il y a de fortes chance que tu le fasses quand tu supprimes tes joueurs
+       //On a lancé la connexion dans le Constructeur, il faut fermer donc la connexion quand tout est fini. Dans le jeu, il y a de fortes chance que tu le fasses quand tu supprimes tes Participants
 	// à priori quand le jeu est terminé. 
         try {
 

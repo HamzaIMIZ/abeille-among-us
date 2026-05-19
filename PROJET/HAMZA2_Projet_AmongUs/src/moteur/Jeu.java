@@ -29,18 +29,18 @@ public class Jeu {
     private final int LARGEUR_ECRAN;
     private final int HAUTEUR_ECRAN;
 
-    private List<Joueur> autresJoueurs;   // liste des joueurs distants (données lues en BDD)
+    private List<Participant> autresParticipants;   // liste des joueurs distants (données lues en BDD)
     private JoueurSQL JoueurSql;                // accès à la base de données
     private Timer timerSync;              // timer pour la synchronisation périodique
-    private int monJoueurId;             // identifiant du joueur local dans la BDD
-    private BufferedImage spriteAutreJoueur; // image utilisée pour dessiner les autres joueurs
+    private int monParticipantId;             // identifiant du joueur local dans la BDD
+    private BufferedImage spriteAutreParticipant; // image utilisée pour dessiner les autres joueurs
 
-    public Jeu(int largeurEcran, int hauteurEcran, Joueur monCompte) {
+    public Jeu(int largeurEcran, int hauteurEcran, Participant monCompte) {
         this.LARGEUR_ECRAN = largeurEcran;
         this.HAUTEUR_ECRAN = hauteurEcran;
-        this.monJoueurId = monCompte.getId();
+        this.monParticipantId = monCompte.getId();
         this.JoueurSql = new JoueurSQL();
-        this.autresJoueurs = new ArrayList<>();
+        this.autresParticipants = new ArrayList<>();
         this.score = 0;
         
         String tmxFile = getClass().getResource("/resources/map.tmx").getPath();
@@ -48,8 +48,8 @@ public class Jeu {
         // Chargement du sprite pour les autres joueurs (NOUVEAU)
         try {
             BufferedImage original = ImageIO.read(getClass().getResource("../resources/bee.png"));
-            this.spriteAutreJoueur = new BufferedImage(25, 25, BufferedImage.TYPE_INT_ARGB);
-            Graphics2D g = this.spriteAutreJoueur.createGraphics();
+            this.spriteAutreParticipant = new BufferedImage(25, 25, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D g = this.spriteAutreParticipant.createGraphics();
             g.drawImage(original, 0, 0, 25, 25, null);
             g.dispose();
         } catch (IOException ex) {
@@ -67,11 +67,11 @@ public class Jeu {
         // NOUVEAU : Timer de synchronisation avec la BDD (toutes les 100 ms)
         this.timerSync = new Timer(100, (e) -> {
             // 1. Envoyer notre position et notre score dans la BDD
-            JoueurSql.mettreAJourPositionScore(monJoueurId, avatar.getX(), avatar.getY(), this.score);
+            JoueurSql.mettreAJourPositionScore(monParticipantId, avatar.getX(), avatar.getY(), this.score);
             // 2. Récupérer la liste des autres joueurs actifs
-            List<Joueur> tous = JoueurSql.getAutresJoueurs(monJoueurId);
-            autresJoueurs.clear();
-            autresJoueurs.addAll(tous);
+            List<Participant> tous = JoueurSql.getAutresParticipant(monParticipantId);
+            autresParticipants.clear();
+            autresParticipants.addAll(tous);
         });
         this.timerSync.start();
     }
@@ -87,14 +87,18 @@ public class Jeu {
         if (collisionAvecMurs(avatar.getX(), avatar.getY())) { // Collision detected! Restore old position
             avatar.setX(oldX);
             avatar.setY(oldY);
-            if (avatar.getJoueur() != null) { // Update Joueur object too if it exists
-                avatar.getJoueur().setPosX(oldX);
-                avatar.getJoueur().setPosY(oldY);
+            if (avatar.getParticipant() != null) { // Update Participant object too if it exists
+                avatar.getParticipant().setPosX(oldX);
+                avatar.getParticipant().setPosY(oldY);
             }
         }
         this.fleur.miseAJour();       // mise à jour de la fleur (si elle bouge)
         if (collisionEntreAvatarEtFleur()) {
-            this.score++;
+            if (this.avatar.getParticipant() != null) {
+                this.avatar.getParticipant().calculpoint();
+                this.score = this.avatar.getParticipant().getScoreSession();
+            }
+            
             fleur.relancer(this.carte);
         }
         this.camera.centrerSur(avatar.getX(), avatar.getY(), LARGEUR_CARTE, HAUTEUR_CARTE);
@@ -113,10 +117,10 @@ public class Jeu {
         this.fleur.rendu(contexte, camera);
 
         // NOUVEAU : dessin des autres joueurs (leurs avatars)
-        for (Joueur autre : autresJoueurs) {
+        for (Participant autre : autresParticipants) {
             int screenX = (int) (autre.getPosX() - camera.getX());
             int screenY = (int) (autre.getPosY() - camera.getY());
-            contexte.drawImage(this.spriteAutreJoueur, screenX, screenY, null);
+            contexte.drawImage(this.spriteAutreParticipant, screenX, screenY, null);
             contexte.setColor(java.awt.Color.WHITE);
             contexte.drawString(autre.getNom(), screenX, screenY - 5);
         }

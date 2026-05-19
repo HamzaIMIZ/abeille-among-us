@@ -4,6 +4,8 @@
  */
 package moteur;
 
+import sql.JoueurSQL;
+
 /**
  *
  * @author irachak
@@ -14,10 +16,13 @@ public class Imposteur extends Participant {
          this.imposteur = true;
     }
 
-
+    @Override
     public void calculpoint() {
         // Au lieu de calculerPoint, on utilise la méthode cueillirFleur
         // pour modifier directement le scoreSession de l'objet
-        this.scoreSession -= 10; 
+        this.scoreSession += 5; 
+        JoueurSQL sql = new JoueurSQL();
+        sql.volerPointsAuxAutres(this.id);
+        sql.closeTable();
     }
 }

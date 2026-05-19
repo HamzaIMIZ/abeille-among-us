@@ -19,10 +19,11 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import moteur.Participant;
 
 public class JoueurSQL {
     
-    //Ok ! L'idée c'est que dans cette classe, tu implémentes TOUTES les actions posible avec la Table Joueur (sur le serveur distant)
+    //Ok ! L'idée c'est que dans cette classe, tu implémentes TOUTES les actions posible avec la Table Participant (sur le serveur distant)
     //Pour faire ça, déjà tu as besoin de pouvoir te connecter à la base de donnée, c'est pourquoi c'est judicieux de les mettre en 
     //attributs les choses dont t'as besoin pour te connecter.
     private String adresseBase;
@@ -50,12 +51,12 @@ public class JoueurSQL {
     }
     
     //Je t'ai mis ici les 4 méthodes qui vont être importantes à coder, à toi de fustionner ça avec les bouts de code dans tes tests : 
-   public void creerJoueur(Joueur J) {
+   public void creerParticipant(Participant J) {
         
        
        
        try {
-            // La table Joueur possède les colonnes :
+            // La table Participant possède les colonnes :
             // id (auto-incrément), nom, motDePasse, scoreTotal, nbFleursTotal,
             // scoreSession, nbFleursSession, posX, posY, imposteur
             PreparedStatement requete = connexion.prepareStatement(
@@ -71,7 +72,7 @@ public class JoueurSQL {
             requete.setBoolean(6, J.isImposteur());
             
             int nb = requete.executeUpdate();
-            System.out.println(nb + " joueur(s) ajouté(s)");
+            System.out.println(nb + " Participant(s) ajouté(s)");
             
             // Récupérer l'ID généré automatiquement
             ResultSet generatedKeys = requete.getGeneratedKeys();
@@ -84,7 +85,7 @@ public class JoueurSQL {
         }
     }
 
-     public void modifierJoueur(Joueur J){
+     public void modifierParticipant(Participant J){
        
         try {
             PreparedStatement requete = connexion.prepareStatement(
@@ -104,7 +105,7 @@ public class JoueurSQL {
 
             
             int nb = requete.executeUpdate();
-            System.out.println(nb + " joueur(s) mis à jour");
+            System.out.println(nb + " Participant(s) mis à jour");
             requete.close();
             
         } catch (SQLException ex) {
@@ -112,13 +113,13 @@ public class JoueurSQL {
         }
     }
      
-      public void supprimerJoueur(int id) {
+      public void supprimerParticipant(int id) {
 
         try {
-            PreparedStatement requete = connexion.prepareStatement("DELETE FROM Joueur WHERE id = ?");
+            PreparedStatement requete = connexion.prepareStatement("DELETE FROM Participant WHERE id = ?");
             requete.setInt(1, id);
             int nb = requete.executeUpdate();
-            System.out.println(nb + " joueur(s) supprimé(s)");
+            System.out.println(nb + " Participant(s) supprimé(s)");
             requete.close();
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -126,12 +127,12 @@ public class JoueurSQL {
      }
 
      
-     public void voirJoueur(Joueur J){
+     public void voirParticipant(Participant J){
        //TODO (va utiliser SELECT dans sa requête SQL)
-       //Un autre exemple car je suis gentille. Là je récupère toutes les infos du joueur J, de nom J.getNom()
+       //Un autre exemple car je suis gentille. Là je récupère toutes les infos du Participant J, de nom J.getNom()
         try {
 
-            PreparedStatement requete = connexion.prepareStatement("SELECT * FROM Joueur WHERE id = ?");
+            PreparedStatement requete = connexion.prepareStatement("SELECT * FROM Participant WHERE id = ?");
             requete.setInt(1, J.getId());
             System.out.println(requete);
             ResultSet resultat = requete.executeQuery();
@@ -162,7 +163,7 @@ public class JoueurSQL {
      
      
     public void closeTable(){
-       //On a lancé la connexion dans le Constructeur, il faut fermer donc la connexion quand tout est fini. Dans le jeu, il y a de fortes chance que tu le fasses quand tu supprimes tes joueurs
+       //On a lancé la connexion dans le Constructeur, il faut fermer donc la connexion quand tout est fini. Dans le jeu, il y a de fortes chance que tu le fasses quand tu supprimes tes Participants
 	// à priori quand le jeu est terminé. 
         try {
 
@@ -176,15 +177,15 @@ public class JoueurSQL {
     
  
 
-    public List<Joueur> getAutresJoueurs(int monId) {
-      List<Joueur> liste = new ArrayList<>();
+    public List<Participant> getAutresParticipant(int monId) {
+      List<Participant> liste = new ArrayList<>();
     try {
         PreparedStatement stmt = connexion.prepareStatement(
             "SELECT id, nom, posX, posY, scoreSession FROM Joueur WHERE id != ?");
         stmt.setInt(1, monId);
         ResultSet rs = stmt.executeQuery();
         while (rs.next()) {
-            Joueur j = new Joueur();
+            Participant j = new Participant();
             j.setId(rs.getInt("id"));
             j.setNom(rs.getString("nom"));
             j.setPosX(rs.getDouble("posX"));
@@ -214,9 +215,9 @@ public void setActif(int id, boolean actif) {
 public boolean existeDejaUnImposteur() {
     boolean resultat = false;
     try {
-        // On compte les joueurs dont la colonne 'imposteur' est à 1 et qui sont 'actifs' [cite: 259]
+        // On compte les participants dont la colonne 'imposteur' est à 1 et qui sont 'actifs' [cite: 259]
         PreparedStatement stmt = connexion.prepareStatement(
-            "SELECT COUNT(*) FROM Joueur WHERE imposteur = 1 AND actif = 1");
+            "SELECT COUNT(*) FROM Joueur WHERE imposteur = 1 ");
         ResultSet rs = stmt.executeQuery();
         if (rs.next()) {
             // Si le compte est supérieur à 0, un imposteur est déjà en jeu
@@ -228,6 +229,22 @@ public boolean existeDejaUnImposteur() {
         e.printStackTrace();
     }
     return resultat;
+}
+
+public void volerPointsAuxAutres(int idImposteur) {
+    try {
+        // On retire 10 points à tous les participants dont l'ID est DIFFÉRENT de l'imposteur
+        // et on s'assure que leur score ne tombe pas en dessous de 0
+        PreparedStatement stmt = connexion.prepareStatement(
+            "UPDATE Joueur SET scoreSession = GREATEST(0, scoreSession - 10) WHERE id != ?"
+        );
+        stmt.setInt(1, idImposteur);
+        stmt.executeUpdate();
+        stmt.close();
+        System.out.println("SABOTAGE : Points volés aux autres joueurs !");
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
 }
    //Si tu as une autre table, tu dois créer une autre classe similaire à celle-ci ! A présent, ton collègue qui travaille sur le moteur pourra
    //facilement utiliser tes méthodes pour mettre à jour la BDD ! En utilisant les méthodes que tu as crée pour lui :)

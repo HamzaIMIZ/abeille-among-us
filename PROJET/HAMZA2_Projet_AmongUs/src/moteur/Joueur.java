@@ -12,9 +12,11 @@ public class Joueur extends Participant {
     public Joueur(int id, String nom, String motDePasse) {
         super(id, nom, motDePasse); // Appel au constructeur de la classe de base
     }
-
+    
+    
+    @Override
     public void calculpoint() {
         
-        this.scoreSession -= 10; 
+        this.scoreSession += 10; 
     }
 }
