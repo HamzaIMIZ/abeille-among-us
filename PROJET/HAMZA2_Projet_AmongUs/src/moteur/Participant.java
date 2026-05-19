@@ -43,10 +43,6 @@ public class Participant {
         this.nom = nom;
     }
      
-
-     public Participant( String nom) {
-        this(0 , nom , "");
-    }
      
     // --- Getters et Setters ---
     public int getId() { return id; }
