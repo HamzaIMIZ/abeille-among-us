@@ -35,7 +35,7 @@ public class FenetreDeJeu extends JFrame implements ActionListener, KeyListener 
     public FenetreDeJeu() {
         // Initialisation de la fenêtre 
         this.setSize(width, height);
-        this.setResizable(false);
+        this.setResizable(true);
         this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE); // appeler notre propre fermeture
         this.setTitle("Abeille Among Us - Multijoueur");
 
