@@ -68,7 +68,15 @@ public class Jeu {
         this.timerSync = new Timer(100, (e) -> {
             // 1. Envoyer notre position et notre score dans la BDD
             JoueurSql.mettreAJourPositionScore(monParticipantId, avatar.getX(), avatar.getY(), this.score);
-            // 2. Récupérer la liste des autres joueurs actifs
+            
+            //MAJ du score
+            int scoreMiseAJour = JoueurSql.getMonScore(monParticipantId);
+            this.score = scoreMiseAJour;
+            if (this.avatar.getParticipant() != null) {
+                this.avatar.getParticipant().setScoreSession(scoreMiseAJour);
+            }
+            //2. Récupérer la liste des autres joueurs actifs
+            
             List<Participant> tous = JoueurSql.getAutresParticipant(monParticipantId);
             autresParticipants.clear();
             autresParticipants.addAll(tous);
@@ -92,6 +100,19 @@ public class Jeu {
                 avatar.getParticipant().setPosY(oldY);
             }
         }
+        
+        if (collisionEntreJoueurs(avatar.getX(), avatar.getY())) {
+            // Collision détectée ! On force le retour à l'ancienne position
+            avatar.setX(oldX);
+            avatar.setY(oldY);
+            if (avatar.getParticipant() != null) {
+                avatar.getParticipant().setPosX(oldX);
+                avatar.getParticipant().setPosY(oldY);
+            }
+            System.out.println("Mouvement interdit : Collision avec un autre joueur !");
+        }
+        
+        
         this.fleur.miseAJour();       // mise à jour de la fleur (si elle bouge)
         if (collisionEntreAvatarEtFleur()) {
             if (this.avatar.getParticipant() != null) {
@@ -200,4 +221,31 @@ public class Jeu {
     public Avatar getAvatar() {
         return this.avatar;
     }
+    private boolean collisionEntreJoueurs(double newX, double newY) {
+        // Taille de notre abeille locale
+        double aw = avatar.getLargeur();
+        double ah = avatar.getHauteur();
+        
+        // Taille fixe des autres joueurs (25x25 comme tu l'as défini dans ton constructeur de Jeu)
+        double ow = 25;
+        double oh = 25;
+
+        // On parcourt tous les autres joueurs présents sur la carte
+        for (Participant autre : autresParticipants) {
+            double ox = autre.getPosX();
+            double oy = autre.getPosY();
+
+            // Formule par exclusion du polycopié : on vérifie si les rectangles ne se touchent PAS
+            if (!(ox >= newX + aw      || // L'autre est trop à droite
+                  ox + ow <= newX      || // L'autre est trop à gauche
+                  oy >= newY + ah      || // L'autre est trop en bas
+                  oy + oh <= newY))       // L'autre est trop en haut
+            {
+                // Si aucune exclusion n'est vraie, ils se touchent !
+                return true; 
+            }
+        }
+        return false; // Pas de collision
+    }
+    
 }

@@ -246,6 +246,25 @@ public void volerPointsAuxAutres(int idImposteur) {
         e.printStackTrace();
     }
 }
+
+public int getMonScore(int monId) {
+    int scoreTrouve = 0;
+    try {
+        PreparedStatement stmt = connexion.prepareStatement(
+            "SELECT scoreSession FROM Joueur WHERE id = ?"
+        );
+        stmt.setInt(1, monId);
+        ResultSet rs = stmt.executeQuery();
+        if (rs.next()) {
+            scoreTrouve = rs.getInt("scoreSession");
+        }
+        rs.close();
+        stmt.close();
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return scoreTrouve;
+}
    //Si tu as une autre table, tu dois créer une autre classe similaire à celle-ci ! A présent, ton collègue qui travaille sur le moteur pourra
    //facilement utiliser tes méthodes pour mettre à jour la BDD ! En utilisant les méthodes que tu as crée pour lui :)
 }
