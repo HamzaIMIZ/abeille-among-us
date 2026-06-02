@@ -7,6 +7,7 @@ package moteur;
 
 import ig.Carte;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -14,7 +15,7 @@ import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 
 /**
- * Exemple de classe lutin
+ * Classe Avatar personnalisable et animable
  *
  * @author guillaume.laurent
  */
@@ -25,14 +26,24 @@ public class Avatar {
     private boolean toucheGauche, toucheDroite, toucheUp, toucheDown;
     private int largeurCarte;
     private int hauteurCarte;
-    private Participant monParticipant; // référence vers l'objet Participant (pour la synchro BDD)
+    private Participant monParticipant; // Référence vers l'objet Participant (pour la synchro BDD)
     private boolean regardeADroite = false;
+    
+    // NOUVEAU : Type de l'avatar sélectionné
+    private String typeAvatar;
 
-    // Constructeur multijoueur
+    // Constructeur à 3 paramètres par défaut (si aucun type n'est fourni, on prend l'abeille)
     public Avatar(int largeurCarte, int hauteurCarte, Participant j) {
+        this(largeurCarte, hauteurCarte, j, "bee");
+    }
+
+    // NOUVEAU : Constructeur à 4 paramètres pour le Lobby de sélection
+    public Avatar(int largeurCarte, int hauteurCarte, Participant j, String typeAvatar) {
         this.largeurCarte = largeurCarte;
         this.hauteurCarte = hauteurCarte;
         this.monParticipant = j;
+        // On passe en minuscules pour correspondre aux noms des fichiers de ressources
+        this.typeAvatar = typeAvatar.toLowerCase();
 
         if (j != null) {
             this.x = j.getPosX();
@@ -42,16 +53,8 @@ public class Avatar {
             this.y = 320;
         }
 
-        int avatar_size = 20;
-        try {
-            BufferedImage imageOriginale = ImageIO.read(getClass().getResource("../resources/bee.png"));
-            this.sprite = new BufferedImage(avatar_size, avatar_size, BufferedImage.TYPE_INT_ARGB);
-            Graphics2D g = this.sprite.createGraphics();
-            g.drawImage(imageOriginale, 0, 0, avatar_size, avatar_size, null);
-            g.dispose();
-        } catch (IOException ex) {
-            Logger.getLogger(Avatar.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        // Chargement dynamique du fichier image
+        chargerImage();
 
         this.toucheGauche = false;
         this.toucheDroite = false;
@@ -59,20 +62,43 @@ public class Avatar {
         this.toucheDown = false;
     }
 
+    /**
+     * Charge l'image de l'avatar spécifié ou applique un repli sur bee.png en cas d'absence.
+     */
+    private void chargerImage() {
+        int avatar_size = 50; // Configuration globale à 50*50 pixels
+        try {
+            String chemin = "../resources/" + this.typeAvatar + ".png";
+            BufferedImage imageOriginale = ImageIO.read(getClass().getResource(chemin));
+            
+            this.sprite = new BufferedImage(avatar_size, avatar_size, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D g = this.sprite.createGraphics();
+            g.drawImage(imageOriginale, 0, 0, avatar_size, avatar_size, null);
+            g.dispose();
+        } catch (Exception ex) {
+            System.err.println("Ressource introuvable : " + this.typeAvatar + ".png. Repli sur l'abeille.");
+            try {
+                // Image de secours par défaut
+                BufferedImage imageOriginale = ImageIO.read(getClass().getResource("../resources/bee.png"));
+                this.sprite = new BufferedImage(avatar_size, avatar_size, BufferedImage.TYPE_INT_ARGB);
+                Graphics2D g = this.sprite.createGraphics();
+                g.drawImage(imageOriginale, 0, 0, avatar_size, avatar_size, null);
+                g.dispose();
+            } catch (IOException e) {
+                Logger.getLogger(Avatar.class.getName()).log(Level.SEVERE, null, e);
+            }
+        }
+    }
+
     public void miseAJour() {
-        if (this.toucheGauche) {
-            x -= 5;
-            regardeADroite = false; // Il va à gauche, pas besoin de miroir
-        }
-        if (this.toucheDroite) {
-            x += 5;
-            regardeADroite = true; // Il va à droite, on va activer le miroir
-        }
+        // Nettoyage et uniformisation de la vitesse (ici fixée à 10 pixels par tick)
         if (this.toucheGauche) {
             x -= 10;
+            regardeADroite = false; 
         }
         if (this.toucheDroite) {
             x += 10;
+            regardeADroite = true; 
         }
         if (this.toucheUp) {
             y -= 10;
@@ -81,7 +107,7 @@ public class Avatar {
             y += 10;
         }
 
-        // Collisions avec les bords de la carte
+        // Collisions adaptées dynamiquement aux dimensions réelles du sprite (50x50)
         if (x > largeurCarte - sprite.getWidth()) {
             x = largeurCarte - sprite.getWidth();
         }
@@ -96,73 +122,52 @@ public class Avatar {
         }
 
         // Synchronisation avec l'objet Participant (pour la BDD)
-        if (monParticipant!= null) {
+        if (monParticipant != null) {
             monParticipant.setPosX(x);
             monParticipant.setPosY(y);
         }
-
     }
 
     public void rendu(Graphics2D contexte, Camera camera) {
         int drawX = (int) (x - camera.getX());
         int drawY = (int) (y - camera.getY());
-        int w = 25; // Largeur de ton sprite
-        int h = 25; // Hauteur de ton sprite
+        int w = sprite.getWidth();  // Utilisation directe de la taille du sprite (50)
+        int h = sprite.getHeight(); // Utilisation directe de la taille du sprite (50)
 
-        if (regardeADroite) {
-            // EFFET MIROIR : On dessine l'image de droite à gauche
-            contexte.drawImage(sprite,
-                    drawX, drawY, drawX + w, drawY + h, // Destination
-                    w, 0, 0, h, // Source (Inversée : w vers 0)
-                    null);
-        } else {
-            // DESSIN NORMAL (Regarde à gauche par défaut)
-            contexte.drawImage(sprite, drawX, drawY, null);
+        if (sprite != null) {
+            if (regardeADroite) {
+                // EFFET MIROIR : On retourne l'image à la volée vers la droite
+                contexte.drawImage(sprite,
+                        drawX, drawY, drawX + w, drawY + h, 
+                        w, 0, 0, h, 
+                        null);
+            } else {
+                // DESSIN NORMAL (Regarde à gauche)
+                contexte.drawImage(sprite, drawX, drawY, null);
+            }
         }
     }
 
+    // NOUVEAU : Méthode permettant de renvoyer directement un objet Rectangle pour les collisions entre joueurs/fleurs
+    public Rectangle getHitbox() {
+        return new Rectangle((int) x, (int) y, sprite.getWidth(), sprite.getHeight());
+    }
+
     // Getters / setters pour les touches
-    public void setToucheGauche(boolean etat) {
-        this.toucheGauche = etat;
-    }
+    public void setToucheGauche(boolean etat) { this.toucheGauche = etat; }
+    public void setToucheDroite(boolean etat) { this.toucheDroite = etat; }
+    public void setToucheHaut(boolean b) { this.toucheUp = b; }
+    public void setToucheBas(boolean b) { this.toucheDown = b; }
 
-    public void setToucheDroite(boolean etat) {
-        this.toucheDroite = etat;
-    }
+    public double getX() { return x; }
+    public double getY() { return y; }
+    public void setX(double x) { this.x = x; }
+    public void setY(double y) { this.y = y; }
 
-    public void setToucheHaut(boolean b) {
-        this.toucheUp = b;
-    }
+    // Correction de l'inversion hauteur/largeur présente dans tes anciens getters
+    public double getLargeur() { return sprite.getWidth(); }
+    public double getHauteur() { return sprite.getHeight(); }
 
-    public void setToucheBas(boolean b) {
-        this.toucheDown = b;
-    }
-
-    public double getX() {
-        return x;
-    }
-
-    public double getY() {
-        return y;
-    }
-
-    public void setX(double x) {
-        this.x = x;
-    }
-
-    public void setY(double y) {
-        this.y = y;
-    }
-
-    public double getLargeur() {
-        return sprite.getHeight();
-    }
-
-    public double getHauteur() {
-        return sprite.getWidth();
-    }
-
-    public Participant getParticipant() {
-        return monParticipant;
-    }
+    public Participant getParticipant() { return monParticipant; }
+    public String getTypeAvatar() { return typeAvatar; }
 }
