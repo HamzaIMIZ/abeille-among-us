@@ -30,8 +30,8 @@ public class Participant {
         this.nom = nom;
         this.motDePasse = motDePasse;
         this.scoreSession = 0;
-        this.posX = 170;   // position initiale (comme dans Avatar)
-        this.posY = 320;
+        this.posX = 150 + (Math.random() * 300);   // position initiale (comme dans Avatar) entre 150 et 450
+        this.posY = 300 + (Math.random() * 300); // Entre 300 et 600
         this.imposteur = false;
     }
 

@@ -231,22 +231,6 @@ public boolean existeDejaUnImposteur() {
     return resultat;
 }
 
-public void volerPointsAuxAutres(int idImposteur) {
-    try {
-        // On retire 10 points à tous les participants dont l'ID est DIFFÉRENT de l'imposteur
-        // et on s'assure que leur score ne tombe pas en dessous de 0
-        PreparedStatement stmt = connexion.prepareStatement(
-            "UPDATE Joueur SET scoreSession = GREATEST(0, scoreSession - 10) WHERE id != ?"
-        );
-        stmt.setInt(1, idImposteur);
-        stmt.executeUpdate();
-        stmt.close();
-        System.out.println("SABOTAGE : Points volés aux autres joueurs !");
-    } catch (SQLException e) {
-        e.printStackTrace();
-    }
-}
-
 public int getMonScore(int monId) {
     int scoreTrouve = 0;
     try {
@@ -264,6 +248,41 @@ public int getMonScore(int monId) {
         e.printStackTrace();
     }
     return scoreTrouve;
+}
+
+// Vérifie si le joueur désigné par le vote est un imposteur
+public boolean verifierSiImposteurParNom(String nomVote) {
+    boolean estImposteur = false;
+    try {
+        PreparedStatement stmt = connexion.prepareStatement(
+            "SELECT imposteur FROM Joueur WHERE nom = ?"
+        );
+        stmt.setString(1, nomVote);
+        ResultSet rs = stmt.executeQuery();
+        if (rs.next()) {
+            estImposteur = rs.getBoolean("imposteur");
+        }
+        rs.close();
+        stmt.close();
+    } catch (SQLException e) { e.printStackTrace(); }
+    return estImposteur;
+}
+
+// Récupère le nom du coupable pour l'afficher à la fin en cas d'erreur
+public String getNomVraiImposteur() {
+    String nom = "Inconnu";
+    try {
+        PreparedStatement stmt = connexion.prepareStatement(
+            "SELECT nom FROM Joueur WHERE imposteur = 1 LIMIT 1"
+        );
+        ResultSet rs = stmt.executeQuery();
+        if (rs.next()) {
+            nom = rs.getString("nom");
+        }
+        rs.close();
+        stmt.close();
+    } catch (SQLException e) { e.printStackTrace(); }
+    return nom;
 }
    //Si tu as une autre table, tu dois créer une autre classe similaire à celle-ci ! A présent, ton collègue qui travaille sur le moteur pourra
    //facilement utiliser tes méthodes pour mettre à jour la BDD ! En utilisant les méthodes que tu as crée pour lui :)

@@ -17,6 +17,6 @@ public class Joueur extends Participant {
     @Override
     public void calculpoint() {
         
-        this.scoreSession += 10; 
+        this.scoreSession += 5; 
     }
 }

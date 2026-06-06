@@ -24,6 +24,9 @@ public class Jeu {
     private Fleur fleur;
     private Camera camera;
     private int score;
+    private int scoreEquipe;
+    private int cyclesChrono = 0; // chrono + vote
+private boolean phaseVoteLancee = false; // chrono + vote
     private final int LARGEUR_CARTE = 3904;
     private final int HAUTEUR_CARTE = 1968;
     private final int LARGEUR_ECRAN;
@@ -66,20 +69,31 @@ public class Jeu {
 
         // NOUVEAU : Timer de synchronisation avec la BDD (toutes les 100 ms)
         this.timerSync = new Timer(100, (e) -> {
-            // 1. Envoyer notre position et notre score dans la BDD
-            JoueurSql.mettreAJourPositionScore(monParticipantId, avatar.getX(), avatar.getY(), this.score);
-            
-            //MAJ du score
-            int scoreMiseAJour = JoueurSql.getMonScore(monParticipantId);
-            this.score = scoreMiseAJour;
+            // 1. ÉTAPE CRUCIALE : On récupère d'abord le score personnel réel stocké localement
             if (this.avatar.getParticipant() != null) {
-                this.avatar.getParticipant().setScoreSession(scoreMiseAJour);
+                int monScorePersoActuel = this.avatar.getParticipant().getScoreSession();
+                // 1. Envoyer notre position et notre score dans la BDD
+                JoueurSql.mettreAJourPositionScore(monParticipantId, avatar.getX(), avatar.getY(), monScorePersoActuel);
+                
+                // 3. On met à jour notre variable locale d'affichage "this.score"
+                this.score = monScorePersoActuel;
+                
             }
-            //2. Récupérer la liste des autres joueurs actifs
+            
+            //4. Récupérer la liste des autres joueurs actifs
             
             List<Participant> tous = JoueurSql.getAutresParticipant(monParticipantId);
             autresParticipants.clear();
             autresParticipants.addAll(tous);
+            
+            // 4. CALCUL DU SCORE D'ÉQUIPE (Somme de tout le monde)
+            int sommeEquipe = this.score; // On commence avec nos points individuels
+            for (Participant autre : tous) {
+                sommeEquipe += autre.getScoreSession(); // On ajoute les points de chaque autre joueur
+            }
+            
+            // 5. On stocke le résultat dans la variable d'équipe
+            this.scoreEquipe = sommeEquipe;
         });
         this.timerSync.start();
     }
@@ -123,7 +137,34 @@ public class Jeu {
             fleur.relancer(this.carte);
         }
         this.camera.centrerSur(avatar.getX(), avatar.getY(), LARGEUR_CARTE, HAUTEUR_CARTE);
-
+        
+        
+        // Systeme chrono + vote
+        
+        this.cyclesChrono++;
+    
+    // Si 1 minute est passée (1500 cycles de 40ms)
+    if (this.cyclesChrono >= 1500 && !phaseVoteLancee) {
+        phaseVoteLancee = true;
+        this.timerSync.stop(); // On arrête la synchronisation des mouvements et scores
+        
+        boolean scoreValide = (this.scoreEquipe >= 50);
+        
+        if (!scoreValide) {
+            // Le score est insuffisant, les abeilles ont la pression pour le vote
+            javax.swing.JOptionPane.showMessageDialog(null, 
+                "TEMPS ÉCOULÉ ! Le score de l'équipe est insuffisant (" + this.scoreEquipe + " < 50).\n" +
+                "Le sabotage a réussi. Les abeilles doivent OBLIGATOIREMENT trouver l'imposteur pour se sauver !");
+        } else {
+            // Le score est bon, les abeilles sont en position de force
+            javax.swing.JOptionPane.showMessageDialog(null, 
+                "TEMPS ÉCOULÉ ! Bon travail, l'objectif de score est atteint (" + this.scoreEquipe + " >= 50).\n" +
+                "Place au vote final pour confirmer votre victoire !");
+        }
+        
+        // Dans les deux cas, on va au vote, et on transmet si le score était bon ou pas
+        lancerSondage(scoreValide);
+    }
     }
 
     public void rendu(Graphics2D contexte) {
@@ -151,7 +192,9 @@ public class Jeu {
 
         // Affichage du score (inchangé)
         contexte.setColor(java.awt.Color.BLACK);
-        contexte.drawString("Score : " + this.score, 10, 20);
+        contexte.drawString("Score  : " + this.score, 10, 40);
+        
+        contexte.drawString("Score Équipe : " + this.scoreEquipe, 10, 20);
     }
 
     //  Collision with abeille
@@ -247,5 +290,60 @@ public class Jeu {
         }
         return false; // Pas de collision
     }
+    
+    
+   // vote
+     private void lancerSondage(boolean scoreValide) {
+    // 1. Préparation de la liste des choix (les pseudos des joueurs)
+    ArrayList<String> choixJoueurs = new ArrayList<>();
+    if (this.avatar.getParticipant() != null) {
+        choixJoueurs.add(this.avatar.getParticipant().getNom());
+    }
+    for (Participant p : autresParticipants) {
+        choixJoueurs.add(p.getNom());
+    }
+    
+    // 2. Affichage du menu déroulant de vote
+    Object[] options = choixJoueurs.toArray();
+    String vote = (String) javax.swing.JOptionPane.showInputDialog(
+        null,
+        "Selon vous, qui est l'imposteur ?",
+        "Sondage de fin de partie",
+        javax.swing.JOptionPane.QUESTION_MESSAGE,
+        null,
+        options,
+        options[0]
+    );
+
+    // 3. Traitement du vote
+    if (vote != null) {
+        // On vérifie en BDD si le joueur voté est le traître
+        boolean estLeVraiImposteur = JoueurSql.verifierSiImposteurParNom(vote);
+        String vraiImposteur = JoueurSql.getNomVraiImposteur();
+        
+        if (estLeVraiImposteur) {
+            // CAS 1 : Les abeilles ont trouvé l'imposteur -> VICTOIRE DES ABEILLES (Peu importe le score !)
+            javax.swing.JOptionPane.showMessageDialog(null, 
+                "BIEN JOUÉ ! Vous avez démasqué le coupable : " + vote + " !\n" +
+                "Vous êtes sauvés. VICTOIRE DES ABEILLES !");
+        } else {
+            // CAS 2 : Les abeilles se sont trompées de cible
+            if (scoreValide) {
+                // Si le score était bon, elles ont quand même perdu au vote, l'imposteur gagne
+                javax.swing.JOptionPane.showMessageDialog(null, 
+                    "Erreur ! " + vote + " était innocent...\n" +
+                    "Malgré votre bon score, l'imposteur vous a bernés. Le vrai traître était : " + vraiImposteur + ".\n" +
+                    "L'IMPOSTEUR GAGNE !");
+            } else {
+                // Si le score était mauvais ET le vote est raté, défaite totale
+                javax.swing.JOptionPane.showMessageDialog(null, 
+                    "Défaite totale ! Score insuffisant et vous avez éliminé un innocent (" + vote + ").\n" +
+                    "Le vrai traître était : " + vraiImposteur + ".\n" +
+                    "L'IMPOSTEUR GAGNE HAUT LA MAIN !");
+            }
+        }
+    }
+    System.exit(0); // Fermeture propre du jeu
+}
     
 }

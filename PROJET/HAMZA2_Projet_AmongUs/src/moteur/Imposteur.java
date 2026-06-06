@@ -20,9 +20,7 @@ public class Imposteur extends Participant {
     public void calculpoint() {
         // Au lieu de calculerPoint, on utilise la méthode cueillirFleur
         // pour modifier directement le scoreSession de l'objet
-        this.scoreSession -= 5; 
-        JoueurSQL sql = new JoueurSQL();
-        sql.volerPointsAuxAutres(this.id);
-        sql.closeTable();
+        this.scoreSession -= 15; 
+        
     }
 }

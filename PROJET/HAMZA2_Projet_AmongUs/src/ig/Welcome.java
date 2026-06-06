@@ -29,6 +29,7 @@ public class Welcome extends javax.swing.JFrame {
      */
     public Welcome() {
         initComponents();
+        
       
     }
     @Override

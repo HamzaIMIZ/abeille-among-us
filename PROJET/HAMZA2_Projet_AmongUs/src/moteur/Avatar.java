@@ -38,8 +38,8 @@ public class Avatar {
             this.x = j.getPosX();
             this.y = j.getPosY();
         } else {
-            this.x = 170;
-            this.y = 320;
+            this.x = 150 + (Math.random() * 300);
+            this.y = 300 + (Math.random() * 300);
         }
 
         int avatar_size = 20;
