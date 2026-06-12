@@ -257,7 +257,9 @@ private boolean phaseVoteLancee = false; // chrono + vote
         if (timerSync != null && timerSync.isRunning()) {
             timerSync.stop();
         }
+        JoueurSql.supprimerParticipant(monParticipantId);
         JoueurSql.closeTable();
+        
     }
 
     // ---------- Getter pour l'avatar (utilisé par FenetreDeJeu pour les touches) ----------

@@ -116,7 +116,7 @@ public class JoueurSQL {
       public void supprimerParticipant(int id) {
 
         try {
-            PreparedStatement requete = connexion.prepareStatement("DELETE FROM Participant WHERE id = ?");
+            PreparedStatement requete = connexion.prepareStatement("DELETE FROM Joueur WHERE id = ?");
             requete.setInt(1, id);
             int nb = requete.executeUpdate();
             System.out.println(nb + " Participant(s) supprimé(s)");
@@ -132,7 +132,7 @@ public class JoueurSQL {
        //Un autre exemple car je suis gentille. Là je récupère toutes les infos du Participant J, de nom J.getNom()
         try {
 
-            PreparedStatement requete = connexion.prepareStatement("SELECT * FROM Participant WHERE id = ?");
+            PreparedStatement requete = connexion.prepareStatement("SELECT * FROM Joueur WHERE id = ?");
             requete.setInt(1, J.getId());
             System.out.println(requete);
             ResultSet resultat = requete.executeQuery();
