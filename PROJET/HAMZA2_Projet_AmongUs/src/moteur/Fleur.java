@@ -25,7 +25,7 @@ public class Fleur {
     private static void chargerSprites(Class<?> clazz) {
         if (spritesCharges) return;
         try {
-            spriteNormale = ImageIO.read(clazz.getResource("../resources/fleur64.png"));
+            spriteNormale = ImageIO.read(clazz.getResource("../resources/fleur32.png"));
 
             // Toxic: draw original + red overlay into a copy
             int w = spriteNormale.getWidth();
@@ -90,8 +90,8 @@ public class Fleur {
 
     private boolean estPositionValideFleur(double posX, double posY, Carte carte) {
         int tailleTuile = carte.getTailleTuile();
-        int tileX = (int) posX / tailleTuile;
-        int tileY = (int) posY / tailleTuile;
+        int tileX = (int) (posX / tailleTuile);
+        int tileY = (int) (posY / tailleTuile);
         if (tileX < 0 || tileX >= carte.getLargeur() || tileY < 0 || tileY >= carte.getHauteur()) return false;
 
         int[][] rooms = carte.getRooms();
