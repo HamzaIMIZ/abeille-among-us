@@ -194,7 +194,7 @@ public class Jeu {
         this.cyclesChrono++;
     
         // Si 1 minute est passée (1500 cycles de 40ms)
-        if (this.cyclesChrono >= 1500 && !phaseVoteLancee) {
+        if (this.cyclesChrono >= 1000 && !phaseVoteLancee) {
             phaseVoteLancee = true;
             this.timerJoueurs.stop(); // On arrête la synchronisation des mouvements et scores
             this.timerFleurs.stop();
@@ -211,6 +211,7 @@ public class Jeu {
                     "TEMPS ÉCOULÉ ! Bon travail, l'objectif de score est atteint (" + this.scoreEquipe + " >= 50).\n" +
                     "Place au vote final pour confirmer votre victoire !");
             }
+            
 
             // Dans les deux cas, on va au vote, et on transmet si le score était bon ou pas
             lancerSondage(scoreValide);
@@ -395,6 +396,9 @@ public class Jeu {
                 }
             }
         }
+        JoueurSql.supprimerParticipant(this.monParticipantId);
+        this.arreter();
+        
         System.exit(0); // Fermeture propre du jeu
     }
     
