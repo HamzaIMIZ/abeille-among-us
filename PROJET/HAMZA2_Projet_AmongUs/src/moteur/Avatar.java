@@ -66,7 +66,7 @@ public class Avatar {
      * Charge l'image de l'avatar spécifié ou applique un repli sur bee.png en cas d'absence.
      */
     private void chargerImage() {
-        int avatar_size = 20; // Configuration globale à 50*50 pixels
+        int avatar_size = 25; // Configuration globale à 50*50 pixels
         try {
             String chemin = "../resources/" + this.typeAvatar + ".png";
             BufferedImage imageOriginale = ImageIO.read(getClass().getResource(chemin));
