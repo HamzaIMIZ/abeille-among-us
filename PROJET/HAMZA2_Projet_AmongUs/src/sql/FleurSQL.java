@@ -57,15 +57,15 @@ public class FleurSQL {
             requete.setInt(2, J.getPoints());
             requete.setDouble(3, J.getX());
             requete.setDouble(4, J.getY());
-            
-            int nb = requete.executeUpdate();
-            System.out.println(nb + " Participant(s) ajouté(s)");
-            
+           
+            requete.executeUpdate();
+           
             // Récupérer l'ID généré automatiquement
             ResultSet generatedKeys = requete.getGeneratedKeys();
             if (generatedKeys.next()) {
                 J.setId(generatedKeys.getInt(1));
             }
+            generatedKeys.close();
             requete.close();
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -83,10 +83,9 @@ public class FleurSQL {
             requete.setInt(2, J.getPoints());
             requete.setDouble(3, J.getX());
             requete.setDouble(4, J.getY());
-            requete.setLong(5, J.getId());
+            requete.setInt(5, J.getId());
             
-            int nb = requete.executeUpdate();
-            System.out.println(nb + " fleur(s) mis à jour");
+            requete.executeUpdate();
             requete.close();
             
         } catch (SQLException ex) {
@@ -99,8 +98,7 @@ public class FleurSQL {
          try {
             PreparedStatement requete = connexion.prepareStatement("DELETE FROM Fleur WHERE id = ?");
             requete.setLong(1, J.getId());
-            int nb = requete.executeUpdate();
-            System.out.println(nb + " fleur(s) supprimé(s)");
+            requete.executeUpdate();
             requete.close();
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -126,46 +124,52 @@ public class FleurSQL {
 
     }   
      
-     
-    public void closeTable(){
-       //On a lancé la connexion dans le Constructeur, il faut fermer donc la connexion quand tout est fini. Dans le jeu, il y a de fortes chance que tu le fasses quand tu supprimes tes Participants
-	// à priori quand le jeu est terminé. 
-        try {
-
-            this.connexion.close();
-            // add delete all flowers in the base de donnés here
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
-
-    }
-    
  
 
-    public List<Fleur> getFleurs(int monId) {
+    public List<Fleur> getToutesFleurs() {
       List<Fleur> liste = new ArrayList<>();
-    try {
-        PreparedStatement stmt = connexion.prepareStatement(
-            "SELECT id, nom, posX, posY, scoreSession FROM Joueur WHERE actif=1 AND id != ?");
-        stmt.setInt(1, monId);
-        ResultSet rs = stmt.executeQuery();
-        while (rs.next()) {
-            Fleur j = new Fleur();
-            j.setId(rs.getInt("id"));
-            j.setType(rs.getInt("type"));
-            j.setX(rs.getDouble("posX"));
-            j.setY(rs.getDouble("posY"));
-            liste.add(j);
+        try {
+            PreparedStatement stmt = connexion.prepareStatement(
+                "SELECT id, type, points, posX, posY FROM Fleur");
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Fleur j = new Fleur();
+                j.setId(rs.getInt("id"));
+                j.setType(rs.getInt("type"));
+                j.setPoints(rs.getInt("points"));
+                j.setX(rs.getDouble("posX"));
+                j.setY(rs.getDouble("posY"));
+                liste.add(j);
+            }
+            rs.close();
+            stmt.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-        rs.close();
-        stmt.close();
-    } catch (SQLException e) {
-        e.printStackTrace();
+        return liste;
     }
-    return liste;
+    
+    public int compterFleurs() {
+        try {
+            PreparedStatement req = connexion.prepareStatement(
+                "SELECT COUNT(*) FROM Fleur");
+            ResultSet rs = req.executeQuery();
+            if (rs.next()) return rs.getInt(1);
+            req.close();
+        } catch (SQLException ex) { ex.printStackTrace(); }
+        return 0;
     }
 
+    // Delete ALL flowers (called on arreter() to clean up)
+    public void supprimerToutesLesFleurs() {
+        try {
+            PreparedStatement req = connexion.prepareStatement("DELETE FROM Fleur");
+            req.executeUpdate();
+            req.close();
+        } catch (SQLException ex) { ex.printStackTrace(); }
+    }
 
-   //Si tu as une autre table, tu dois créer une autre classe similaire à celle-ci ! A présent, ton collègue qui travaille sur le moteur pourra
-   //facilement utiliser tes méthodes pour mettre à jour la BDD ! En utilisant les méthodes que tu as crée pour lui :)
+    public void closeTable() {
+        try { connexion.close(); } catch (SQLException ex) { ex.printStackTrace(); }
+    }
 }

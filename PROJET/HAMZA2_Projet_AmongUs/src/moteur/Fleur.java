@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package moteur;
 
 import ig.Carte;
@@ -13,173 +8,128 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 
-/**
- * Exemple de classe lutin
- *
- * @author guillaume.laurent
- */
 public class Fleur {
 
-    protected BufferedImage sprite;
+    // Static: loaded ONCE for the entire program, shared by all Fleur instances
+    private static BufferedImage spriteNormale;
+    private static BufferedImage spriteToxique;
+    private static boolean spritesCharges = false;
+
+    private BufferedImage sprite;
     private double x, y;
-    private int largeurCarte;
-    private int hauteurCarte;
-    
     private int id;
     private int type;
     private int points;
-    
-    
-    public Fleur(int largeurCarte, int hauteurCarte, int type) {
-        int fleur_size = 64;
-        this.largeurCarte = largeurCarte;
-        this.hauteurCarte = hauteurCarte; 
-        this.type = type;
+
+    // Called once — loads original image with no resize
+    private static void chargerSprites(Class<?> clazz) {
+        if (spritesCharges) return;
         try {
-            BufferedImage imageOriginale = ImageIO.read(getClass().getResource("../resources/fleur1.png"));
-            // Créer une nouvelle image redimensionnée 
-            this.sprite = new BufferedImage(fleur_size, fleur_size, BufferedImage.TYPE_INT_ARGB);
-            Graphics2D g = this.sprite.createGraphics();
-            g.drawImage(imageOriginale, 0, 0, fleur_size, fleur_size, null);
-            g.dispose();
+            spriteNormale = ImageIO.read(clazz.getResource("../resources/fleur64.png"));
+
+            // Toxic: draw original + red overlay into a copy
+            int w = spriteNormale.getWidth();
+            int h = spriteNormale.getHeight();
+            spriteToxique = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D g = spriteToxique.createGraphics();
+            g.drawImage(spriteNormale, 0, 0, null);
+            //g.setColor(new java.awt.Color(255, 0, 0, 120));
+            //g.fillRect(0, 0, w, h);
+            //g.dispose();
+
+            spritesCharges = true;
         } catch (IOException ex) {
             Logger.getLogger(Fleur.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+
+    // Default constructor (used when loading from SQL)
+    public Fleur() {
+        chargerSprites(getClass());
+        this.type = 1;
+        this.points = 100;
+        this.sprite = spriteNormale;
         this.x = 200;
         this.y = 200;
-        
-        if(this.type == 1){this.points = 100;}      //type == 1 means it is a normal fleur
-        if(this.type == 2){this.points = -100;}     //type == 2 means it is a toxic fleur
-        if(this.type == 3){this.points = 200;}      //type == 3 means it is a powerful fleur
-        else{this.type = 1; this.points = 100;}
-        
     }
-    
-        // Constructeur par défaut
-    public Fleur() {
-        this(0, 0, 0);
-    }
-    
 
-    public void miseAJour() {
-        
+    // Constructor used when creating new flowers
+    public Fleur(int type) {
+        chargerSprites(getClass());
+        this.x = 200;
+        this.y = 200;
+        setType(type);
     }
+
+    public void miseAJour() { }
 
     public void rendu(Graphics2D contexte, Camera camera) {
-        contexte.drawImage(this.sprite, (int) (x - camera.getX()), (int) (y - camera.getY()), null);
+        if (this.sprite != null) {
+            contexte.drawImage(this.sprite,
+                (int)(x - camera.getX()),
+                (int)(y - camera.getY()),
+                null);
+        }
     }
-    
+
     public void relancer(Carte carte) {
         int attempts = 0;
         boolean positionTrouvee = false;
-
-        while (!positionTrouvee && attempts < 100) {
-            // Random position in the map
+        while (!positionTrouvee && attempts < 200) {
             double testX = Math.random() * carte.getLargeur() * carte.getTailleTuile();
             double testY = Math.random() * carte.getHauteur() * carte.getTailleTuile();
-
-            if (estPositionValide(testX, testY, carte)) {// Check if this position is valid
+            if (estPositionValideFleur(testX, testY, carte)) {
                 this.x = testX;
                 this.y = testY;
                 positionTrouvee = true;
             }
             attempts++;
         }
-
-        // If no valid position found after 100 tries, place at default position
-        if (!positionTrouvee) {
-            this.x = 200;
-            this.y = 200;
-        }
+        if (!positionTrouvee) { this.x = 200; this.y = 200; }
     }
-    
-    
-    private boolean estPositionValide(double posX, double posY, Carte carte) {
+
+    private boolean estPositionValideFleur(double posX, double posY, Carte carte) {
         int tailleTuile = carte.getTailleTuile();
         int tileX = (int) posX / tailleTuile;
         int tileY = (int) posY / tailleTuile;
-
-        // Check bounds
-        if (tileX < 0 || tileX >= carte.getLargeur() || tileY < 0 || tileY >= carte.getHauteur()) {
-            return false;
-        }
+        if (tileX < 0 || tileX >= carte.getLargeur() || tileY < 0 || tileY >= carte.getHauteur()) return false;
 
         int[][] rooms = carte.getRooms();
         int[][] background = carte.getBackground();
         int[][] veget = carte.getVeget();
         int[][] veg2 = carte.getVeg2();
 
-        // Must NOT be on a wall (rooms must be -1)
-        if (rooms != null && rooms[tileY][tileX] != -1) {
-            return false; // There's a wall here
-        }
-
-        // Must be on ground (at least one of background, veget, or veg2 is not -1)
-        boolean surTerrain = false;
-        if (background != null && background[tileY][tileX] != -1) {
-            surTerrain = true;
-        }
-        if (veget != null && veget[tileY][tileX] != -1) {
-            surTerrain = true;
-        }
-        if (veg2 != null && veg2[tileY][tileX] != -1) {
-            surTerrain = true;
-        }
-        return surTerrain;
-    }
-
-    
-    public double getLargeur() {
-        return sprite.getHeight();
-    }
-
-    public double getHauteur() {
-        return sprite.getWidth();
-    }
-
-    public double getX() {
-        return x;
-    }
-
-    public void setX(double x) {
-        this.x = x;
-    }
-
-    public double getY() {
-        return y;
-    }
-
-    public void setY(double y) {
-        this.y = y;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public int getType() {
-        return type;
+        if (rooms != null && rooms[tileY][tileX] != -1) return false;
+        if (background == null || background[tileY][tileX] == -1) return false;
+        if (veget != null && veget[tileY][tileX] != -1) return false;
+        if (veg2 != null && veg2[tileY][tileX] != -1) return false;
+        return true;
     }
 
     public void setType(int type) {
         this.type = type;
+        if (type == 2) {
+            this.points = -5;
+            this.sprite = spriteToxique;
+        } else if (type == 3) {
+            this.points = 10;
+            this.sprite = spriteNormale;
+        } else {
+            this.type = 1;
+            this.points = 5;
+            this.sprite = spriteNormale;
+        }
     }
 
-    public int getPoints() {
-        return points;
-    }
-
-    public void setPoints(int points) {
-        this.points = points;
-    }
-    
-    
-    
-    
-
+    public double getLargeur() { return (sprite != null) ? sprite.getWidth() : 32; }
+    public double getHauteur() { return (sprite != null) ? sprite.getHeight() : 32; }
+    public double getX() { return x; }
+    public void setX(double x) { this.x = x; }
+    public double getY() { return y; }
+    public void setY(double y) { this.y = y; }
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
+    public int getType() { return type; }
+    public int getPoints() { return points; }
+    public void setPoints(int points) { this.points = points; }
 }
-

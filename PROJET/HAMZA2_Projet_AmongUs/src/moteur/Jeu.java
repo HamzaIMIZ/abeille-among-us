@@ -16,17 +16,18 @@ import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.Timer;
 import sql.JoueurSQL;
+import sql.FleurSQL;
 
 public class Jeu {
 
     private Carte carte;
     private Avatar avatar;  
-    private Fleur fleur;
+    //private Fleur fleur;
     private Camera camera;
     private int score;
     private int scoreEquipe;
     private int cyclesChrono = 0; // chrono + vote
-private boolean phaseVoteLancee = false; // chrono + vote
+    private boolean phaseVoteLancee = false; // chrono + vote
     private final int LARGEUR_CARTE = 3904;
     private final int HAUTEUR_CARTE = 1968;
     private final int LARGEUR_ECRAN;
@@ -34,9 +35,15 @@ private boolean phaseVoteLancee = false; // chrono + vote
 
     private List<Participant> autresParticipants;   // liste des joueurs distants (données lues en BDD)
     private JoueurSQL JoueurSql;                // accès à la base de données
-    private Timer timerSync;              // timer pour la synchronisation périodique
+    //private Timer timerSync;              // timer pour la synchronisation périodique
     private int monParticipantId;             // identifiant du joueur local dans la BDD
     private BufferedImage spriteAutreParticipant; // image utilisée pour dessiner les autres joueurs
+    
+    private List<Fleur> fleurs = new ArrayList<>();
+    private FleurSQL fleurSql;
+    
+    private Timer timerJoueurs;
+    private Timer timerFleurs;
 
     public Jeu(int largeurEcran, int hauteurEcran, Participant monCompte) {
         this.LARGEUR_ECRAN = largeurEcran;
@@ -48,6 +55,11 @@ private boolean phaseVoteLancee = false; // chrono + vote
         
         String tmxFile = getClass().getResource("/resources/map.tmx").getPath();
         this.carte = new Carte(tmxFile);
+        
+        this.fleurSql = new FleurSQL();
+        //this.fleur = new Fleur(LARGEUR_CARTE, HAUTEUR_CARTE, 1); // Création de la fleur
+        this.fleurs = new ArrayList<>();
+        
         // Chargement du sprite pour les autres joueurs (NOUVEAU)
         try {
             BufferedImage original = ImageIO.read(getClass().getResource("../resources/bee.png"));
@@ -58,17 +70,18 @@ private boolean phaseVoteLancee = false; // chrono + vote
         } catch (IOException ex) {
             Logger.getLogger(Jeu.class.getName()).log(Level.SEVERE, null, ex);
         }
+       
         
-        this.fleur = new Fleur(LARGEUR_CARTE, HAUTEUR_CARTE, 1); // Création de la fleur
         this.avatar = new Avatar(LARGEUR_CARTE, HAUTEUR_CARTE, monCompte); // Création de l'avatar
         // On positionne l'avatar aux coordonnées enregistrées en BDD (NOUVEAU)
         this.avatar.setX(monCompte.getPosX());
         this.avatar.setY(monCompte.getPosY());
 
         this.camera = new Camera(LARGEUR_ECRAN, HAUTEUR_ECRAN);
-
+        initialiserFleurs();
+        
         // NOUVEAU : Timer de synchronisation avec la BDD (toutes les 100 ms)
-        this.timerSync = new Timer(100, (e) -> {
+        this.timerJoueurs = new Timer(100, (e) -> {
             // 1. ÉTAPE CRUCIALE : On récupère d'abord le score personnel réel stocké localement
             if (this.avatar.getParticipant() != null) {
                 int monScorePersoActuel = this.avatar.getParticipant().getScoreSession();
@@ -94,8 +107,17 @@ private boolean phaseVoteLancee = false; // chrono + vote
             
             // 5. On stocke le résultat dans la variable d'équipe
             this.scoreEquipe = sommeEquipe;
+            
+            fleurs.clear();
+            fleurs.addAll(fleurSql.getToutesFleurs());
         });
-        this.timerSync.start();
+        
+        this.timerFleurs = new Timer(1200, (e) -> {
+            fleurs.clear();
+            fleurs.addAll(fleurSql.getToutesFleurs());
+        });
+        this.timerJoueurs.start();
+        this.timerFleurs.start();
     }
 
     public void miseAJour() {
@@ -127,14 +149,34 @@ private boolean phaseVoteLancee = false; // chrono + vote
         }
         
         
-        this.fleur.miseAJour();       // mise à jour de la fleur (si elle bouge)
-        if (collisionEntreAvatarEtFleur()) {
-            if (this.avatar.getParticipant() != null) {
-                this.avatar.getParticipant().calculpoint();
-                this.score = this.avatar.getParticipant().getScoreSession();
+        for (int i = fleurs.size() - 1; i >= 0; i--) {
+            Fleur f = fleurs.get(i);
+            if (collisionEntreAvatarEtFleur(f)) {
+                // Apply points to this player
+                int pointsGagnes = f.getPoints(); // +100, -100, or +200
+                this.score += pointsGagnes;
+                
+                if (avatar.getParticipant() != null) {
+                    int nouveau = avatar.getParticipant().getScoreSession() + pointsGagnes;
+                    avatar.getParticipant().setScoreSession(Math.max(0, nouveau)); // score never below 0
+                }
+                // Remove from DB — all other clients will see it disappear on next sync
+                fleurSql.supprimerFleur(f);
+                fleurs.remove(i);
+                int nouveauType;
+                double hasard = Math.random();
+
+                // même logique que init : majorité normales, quelques toxiques
+                if (hasard < 0.7) {
+                    nouveauType = 1; // normale
+                } else {
+                    nouveauType = 2; // toxique
+                }
+                Fleur nouvelleFleur = new Fleur(nouveauType);
+                nouvelleFleur.relancer(carte);
+                fleurSql.creerFleur(nouvelleFleur);
+                fleurs.add(nouvelleFleur);
             }
-            
-            fleur.relancer(this.carte);
         }
         this.camera.centrerSur(avatar.getX(), avatar.getY(), LARGEUR_CARTE, HAUTEUR_CARTE);
         
@@ -143,28 +185,28 @@ private boolean phaseVoteLancee = false; // chrono + vote
         
         this.cyclesChrono++;
     
-    // Si 1 minute est passée (1500 cycles de 40ms)
-    if (this.cyclesChrono >= 1500 && !phaseVoteLancee) {
-        phaseVoteLancee = true;
-        this.timerSync.stop(); // On arrête la synchronisation des mouvements et scores
-        
-        boolean scoreValide = (this.scoreEquipe >= 50);
-        
-        if (!scoreValide) {
-            // Le score est insuffisant, les abeilles ont la pression pour le vote
-            javax.swing.JOptionPane.showMessageDialog(null, 
-                "TEMPS ÉCOULÉ ! Le score de l'équipe est insuffisant (" + this.scoreEquipe + " < 50).\n" +
-                "Le sabotage a réussi. Les abeilles doivent OBLIGATOIREMENT trouver l'imposteur pour se sauver !");
-        } else {
-            // Le score est bon, les abeilles sont en position de force
-            javax.swing.JOptionPane.showMessageDialog(null, 
-                "TEMPS ÉCOULÉ ! Bon travail, l'objectif de score est atteint (" + this.scoreEquipe + " >= 50).\n" +
-                "Place au vote final pour confirmer votre victoire !");
+        // Si 1 minute est passée (1500 cycles de 40ms)
+        if (this.cyclesChrono >= 1500 && !phaseVoteLancee) {
+            phaseVoteLancee = true;
+            this.timerJoueurs.stop(); // On arrête la synchronisation des mouvements et scores
+            this.timerFleurs.stop();
+            boolean scoreValide = (this.scoreEquipe >= 50);
+
+            if (!scoreValide) {
+                // Le score est insuffisant, les abeilles ont la pression pour le vote
+                javax.swing.JOptionPane.showMessageDialog(null, 
+                    "TEMPS ÉCOULÉ ! Le score de l'équipe est insuffisant (" + this.scoreEquipe + " < 50).\n" +
+                    "Le sabotage a réussi. Les abeilles doivent OBLIGATOIREMENT trouver l'imposteur pour se sauver !");
+            } else {
+                // Le score est bon, les abeilles sont en position de force
+                javax.swing.JOptionPane.showMessageDialog(null, 
+                    "TEMPS ÉCOULÉ ! Bon travail, l'objectif de score est atteint (" + this.scoreEquipe + " >= 50).\n" +
+                    "Place au vote final pour confirmer votre victoire !");
+            }
+
+            // Dans les deux cas, on va au vote, et on transmet si le score était bon ou pas
+            lancerSondage(scoreValide);
         }
-        
-        // Dans les deux cas, on va au vote, et on transmet si le score était bon ou pas
-        lancerSondage(scoreValide);
-    }
     }
 
     public void rendu(Graphics2D contexte) {
@@ -174,9 +216,6 @@ private boolean phaseVoteLancee = false; // chrono + vote
         contexte.translate((int) -camera.getX(), (int) -camera.getY());
         this.carte.rendu(contexte);
         contexte.translate((int) camera.getX(), (int) camera.getY());
-
-        // Dessin de la fleur
-        this.fleur.rendu(contexte, camera);
 
         // NOUVEAU : dessin des autres joueurs (leurs avatars)
         for (Participant autre : autresParticipants) {
@@ -190,6 +229,9 @@ private boolean phaseVoteLancee = false; // chrono + vote
         // Dessin de l'avatar local
         this.avatar.rendu(contexte, camera);
 
+        for (Fleur f : fleurs) {
+            f.rendu(contexte, camera);
+        }
         // Affichage du score (inchangé)
         contexte.setColor(java.awt.Color.BLACK);
         contexte.drawString("Score  : " + this.score, 10, 40);
@@ -197,10 +239,12 @@ private boolean phaseVoteLancee = false; // chrono + vote
         contexte.drawString("Score Équipe : " + this.scoreEquipe, 10, 20);
     }
 
-    //  Collision with abeille
-    private boolean collisionEntreAvatarEtFleur() {
-        double ax = avatar.getX(), ay = avatar.getY(), aw = avatar.getLargeur(), ah = avatar.getHauteur();
-        double fx = fleur.getX(), fy = fleur.getY(), fw = fleur.getLargeur(), fh = fleur.getHauteur();
+    //  Collision flower with abeille
+    private boolean collisionEntreAvatarEtFleur(Fleur f) {
+        double ax = avatar.getX(), ay = avatar.getY(),
+               aw = avatar.getLargeur(), ah = avatar.getHauteur();
+        double fx = f.getX(), fy = f.getY(),
+               fw = f.getLargeur(), fh = f.getHauteur();
         return !(fx >= ax + aw || fx + fw <= ax || fy >= ay + ah || fy + fh <= ay);
     }
     
@@ -247,19 +291,17 @@ private boolean phaseVoteLancee = false; // chrono + vote
         return rooms[tileY][tileX] != -1; // If value is not -1, it's a wall
     }
 
-    // ---------- estTermine
     public boolean estTermine() {
-        return this.fleur.getY() > HAUTEUR_CARTE;
+        return false;
     }
 
-    // ---------- NOUVELLE METHODE pour arrêter proprement le jeu ----------
     public void arreter() {
-        if (timerSync != null && timerSync.isRunning()) {
-            timerSync.stop();
-        }
-        JoueurSql.supprimerParticipant(monParticipantId);
+        if (timerJoueurs != null && timerJoueurs.isRunning()) timerJoueurs.stop();
+        if (timerFleurs != null && timerFleurs.isRunning()) timerFleurs.stop();
+        JoueurSql.supprimerParticipant(monParticipantId);    
         JoueurSql.closeTable();
-        
+          
+        fleurSql.closeTable();
     }
 
     // ---------- Getter pour l'avatar (utilisé par FenetreDeJeu pour les touches) ----------
@@ -295,57 +337,92 @@ private boolean phaseVoteLancee = false; // chrono + vote
     
     
    // vote
-     private void lancerSondage(boolean scoreValide) {
-    // 1. Préparation de la liste des choix (les pseudos des joueurs)
-    ArrayList<String> choixJoueurs = new ArrayList<>();
-    if (this.avatar.getParticipant() != null) {
-        choixJoueurs.add(this.avatar.getParticipant().getNom());
-    }
-    for (Participant p : autresParticipants) {
-        choixJoueurs.add(p.getNom());
-    }
-    
-    // 2. Affichage du menu déroulant de vote
-    Object[] options = choixJoueurs.toArray();
-    String vote = (String) javax.swing.JOptionPane.showInputDialog(
-        null,
-        "Selon vous, qui est l'imposteur ?",
-        "Sondage de fin de partie",
-        javax.swing.JOptionPane.QUESTION_MESSAGE,
-        null,
-        options,
-        options[0]
-    );
+    private void lancerSondage(boolean scoreValide) {
+        // 1. Préparation de la liste des choix (les pseudos des joueurs)
+        ArrayList<String> choixJoueurs = new ArrayList<>();
+        if (this.avatar.getParticipant() != null) {
+            choixJoueurs.add(this.avatar.getParticipant().getNom());
+        }
+        for (Participant p : autresParticipants) {
+            choixJoueurs.add(p.getNom());
+        }
 
-    // 3. Traitement du vote
-    if (vote != null) {
-        // On vérifie en BDD si le joueur voté est le traître
-        boolean estLeVraiImposteur = JoueurSql.verifierSiImposteurParNom(vote);
-        String vraiImposteur = JoueurSql.getNomVraiImposteur();
-        
-        if (estLeVraiImposteur) {
-            // CAS 1 : Les abeilles ont trouvé l'imposteur -> VICTOIRE DES ABEILLES (Peu importe le score !)
-            javax.swing.JOptionPane.showMessageDialog(null, 
-                "BIEN JOUÉ ! Vous avez démasqué le coupable : " + vote + " !\n" +
-                "Vous êtes sauvés. VICTOIRE DES ABEILLES !");
-        } else {
-            // CAS 2 : Les abeilles se sont trompées de cible
-            if (scoreValide) {
-                // Si le score était bon, elles ont quand même perdu au vote, l'imposteur gagne
+        // 2. Affichage du menu déroulant de vote
+        Object[] options = choixJoueurs.toArray();
+        String vote = (String) javax.swing.JOptionPane.showInputDialog(
+            null,
+            "Selon vous, qui est l'imposteur ?",
+            "Sondage de fin de partie",
+            javax.swing.JOptionPane.QUESTION_MESSAGE,
+            null,
+            options,
+            options[0]
+        );
+
+        // 3. Traitement du vote
+        if (vote != null) {
+            // On vérifie en BDD si le joueur voté est le traître
+            boolean estLeVraiImposteur = JoueurSql.verifierSiImposteurParNom(vote);
+            String vraiImposteur = JoueurSql.getNomVraiImposteur();
+
+            if (estLeVraiImposteur) {
+                // CAS 1 : Les abeilles ont trouvé l'imposteur -> VICTOIRE DES ABEILLES (Peu importe le score !)
                 javax.swing.JOptionPane.showMessageDialog(null, 
-                    "Erreur ! " + vote + " était innocent...\n" +
-                    "Malgré votre bon score, l'imposteur vous a bernés. Le vrai traître était : " + vraiImposteur + ".\n" +
-                    "L'IMPOSTEUR GAGNE !");
+                    "BIEN JOUÉ ! Vous avez démasqué le coupable : " + vote + " !\n" +
+                    "Vous êtes sauvés. VICTOIRE DES ABEILLES !");
             } else {
-                // Si le score était mauvais ET le vote est raté, défaite totale
-                javax.swing.JOptionPane.showMessageDialog(null, 
-                    "Défaite totale ! Score insuffisant et vous avez éliminé un innocent (" + vote + ").\n" +
-                    "Le vrai traître était : " + vraiImposteur + ".\n" +
-                    "L'IMPOSTEUR GAGNE HAUT LA MAIN !");
+                // CAS 2 : Les abeilles se sont trompées de cible
+                if (scoreValide) {
+                    // Si le score était bon, elles ont quand même perdu au vote, l'imposteur gagne
+                    javax.swing.JOptionPane.showMessageDialog(null, 
+                        "Erreur ! " + vote + " était innocent...\n" +
+                        "Malgré votre bon score, l'imposteur vous a bernés. Le vrai traître était : " + vraiImposteur + ".\n" +
+                        "L'IMPOSTEUR GAGNE !");
+                } else {
+                    // Si le score était mauvais ET le vote est raté, défaite totale
+                    javax.swing.JOptionPane.showMessageDialog(null, 
+                        "Défaite totale ! Score insuffisant et vous avez éliminé un innocent (" + vote + ").\n" +
+                        "Le vrai traître était : " + vraiImposteur + ".\n" +
+                        "L'IMPOSTEUR GAGNE HAUT LA MAIN !");
+                }
             }
         }
+        System.exit(0); // Fermeture propre du jeu
     }
-    System.exit(0); // Fermeture propre du jeu
-}
+    
+    private void initialiserFleurs() {
+            // If no players in DB yet (fresh session), clean up leftover flowers
+            int nbJoueurs = JoueurSql.compterJoueursActifs();
+            if (nbJoueurs <= 1) {
+                // We are the first (or only) player — reset flowers
+                fleurSql.supprimerToutesLesFleurs();
+            }
+
+            int nb = fleurSql.compterFleurs();
+            System.out.println("Fleurs dans la BDD au démarrage : " + nb);
+
+            if (nb < 10) {
+                int aCreer = 10 - nb;
+                System.out.println("Création de " + aCreer + " fleurs...");
+                for (int i = 0; i < (int)(aCreer * 0.7); i++) {
+                    Fleur f = new Fleur(1);
+                    f.relancer(carte);
+                    fleurSql.creerFleur(f);
+                    fleurs.add(f);
+                }
+                int toxiquesACreer = aCreer - (int)(aCreer * 0.7);
+                for (int i = 0; i < toxiquesACreer; i++) {
+                    Fleur f = new Fleur(2);
+                    f.relancer(carte);
+                    fleurSql.creerFleur(f);
+                    fleurs.add(f);
+                }
+            }
+
+
+            fleurs.clear();
+            fleurs.addAll(fleurSql.getToutesFleurs());
+            System.out.println("Fleurs chargées en mémoire : " + fleurs.size()); // ← ADD THIS
+    }
     
 }

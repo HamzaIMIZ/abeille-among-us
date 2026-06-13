@@ -202,88 +202,103 @@ public class JoueurSQL {
     }
 
 
-public void setActif(int id, boolean actif) {
-    try {
-        PreparedStatement stmt = connexion.prepareStatement("UPDATE Joueur SET actif=? WHERE id=?");
-        stmt.setBoolean(1, actif);
-        stmt.setInt(2, id);
-        stmt.executeUpdate();
-        stmt.close();
-    } catch (SQLException e) { e.printStackTrace(); }
-}
-
-public boolean existeDejaUnImposteur() {
-    boolean resultat = false;
-    try {
-        // On compte les participants dont la colonne 'imposteur' est à 1 et qui sont 'actifs' [cite: 259]
-        PreparedStatement stmt = connexion.prepareStatement(
-            "SELECT COUNT(*) FROM Joueur WHERE imposteur = 1 ");
-        ResultSet rs = stmt.executeQuery();
-        if (rs.next()) {
-            // Si le compte est supérieur à 0, un imposteur est déjà en jeu
-            resultat = rs.getInt(1) > 0;
-        }
-        rs.close();
-        stmt.close();
-    } catch (SQLException e) {
-        e.printStackTrace();
+    public void setActif(int id, boolean actif) {
+        try {
+            PreparedStatement stmt = connexion.prepareStatement("UPDATE Joueur SET actif=? WHERE id=?");
+            stmt.setBoolean(1, actif);
+            stmt.setInt(2, id);
+            stmt.executeUpdate();
+            stmt.close();
+        } catch (SQLException e) { e.printStackTrace(); }
     }
-    return resultat;
-}
 
-public int getMonScore(int monId) {
-    int scoreTrouve = 0;
-    try {
-        PreparedStatement stmt = connexion.prepareStatement(
-            "SELECT scoreSession FROM Joueur WHERE id = ?"
-        );
-        stmt.setInt(1, monId);
-        ResultSet rs = stmt.executeQuery();
-        if (rs.next()) {
-            scoreTrouve = rs.getInt("scoreSession");
+    public boolean existeDejaUnImposteur() {
+        boolean resultat = false;
+        try {
+            // On compte les participants dont la colonne 'imposteur' est à 1 et qui sont 'actifs' [cite: 259]
+            PreparedStatement stmt = connexion.prepareStatement(
+                "SELECT COUNT(*) FROM Joueur WHERE imposteur = 1 ");
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                // Si le compte est supérieur à 0, un imposteur est déjà en jeu
+                resultat = rs.getInt(1) > 0;
+            }
+            rs.close();
+            stmt.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-        rs.close();
-        stmt.close();
-    } catch (SQLException e) {
-        e.printStackTrace();
+        return resultat;
     }
-    return scoreTrouve;
-}
 
-// Vérifie si le joueur désigné par le vote est un imposteur
-public boolean verifierSiImposteurParNom(String nomVote) {
-    boolean estImposteur = false;
-    try {
-        PreparedStatement stmt = connexion.prepareStatement(
-            "SELECT imposteur FROM Joueur WHERE nom = ?"
-        );
-        stmt.setString(1, nomVote);
-        ResultSet rs = stmt.executeQuery();
-        if (rs.next()) {
-            estImposteur = rs.getBoolean("imposteur");
+    public int getMonScore(int monId) {
+        int scoreTrouve = 0;
+        try {
+            PreparedStatement stmt = connexion.prepareStatement(
+                "SELECT scoreSession FROM Joueur WHERE id = ?"
+            );
+            stmt.setInt(1, monId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                scoreTrouve = rs.getInt("scoreSession");
+            }
+            rs.close();
+            stmt.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-        rs.close();
-        stmt.close();
-    } catch (SQLException e) { e.printStackTrace(); }
-    return estImposteur;
-}
+        return scoreTrouve;
+    }
 
-// Récupère le nom du coupable pour l'afficher à la fin en cas d'erreur
-public String getNomVraiImposteur() {
-    String nom = "Inconnu";
-    try {
-        PreparedStatement stmt = connexion.prepareStatement(
-            "SELECT nom FROM Joueur WHERE imposteur = 1 LIMIT 1"
-        );
-        ResultSet rs = stmt.executeQuery();
-        if (rs.next()) {
-            nom = rs.getString("nom");
-        }
-        rs.close();
-        stmt.close();
-    } catch (SQLException e) { e.printStackTrace(); }
-    return nom;
-}
+    // Vérifie si le joueur désigné par le vote est un imposteur
+    public boolean verifierSiImposteurParNom(String nomVote) {
+        boolean estImposteur = false;
+        try {
+            PreparedStatement stmt = connexion.prepareStatement(
+                "SELECT imposteur FROM Joueur WHERE nom = ?"
+            );
+            stmt.setString(1, nomVote);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                estImposteur = rs.getBoolean("imposteur");
+            }
+            rs.close();
+            stmt.close();
+        } catch (SQLException e) { e.printStackTrace(); }
+        return estImposteur;
+    }
+
+    // Récupère le nom du coupable pour l'afficher à la fin en cas d'erreur
+    public String getNomVraiImposteur() {
+        String nom = "Inconnu";
+        try {
+            PreparedStatement stmt = connexion.prepareStatement(
+                "SELECT nom FROM Joueur WHERE imposteur = 1 LIMIT 1"
+            );
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                nom = rs.getString("nom");
+            }
+            rs.close();
+            stmt.close();
+        } catch (SQLException e) { e.printStackTrace(); }
+        return nom;
+    }
    //Si tu as une autre table, tu dois créer une autre classe similaire à celle-ci ! A présent, ton collègue qui travaille sur le moteur pourra
    //facilement utiliser tes méthodes pour mettre à jour la BDD ! En utilisant les méthodes que tu as crée pour lui :)
+    public int compterJoueursActifs() {
+        try {
+            PreparedStatement stmt = connexion.prepareStatement(
+                "SELECT COUNT(*) FROM Joueur"
+            );
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) return rs.getInt(1);
+            rs.close();
+            stmt.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+    
 }

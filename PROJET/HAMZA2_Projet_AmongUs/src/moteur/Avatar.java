@@ -66,7 +66,7 @@ public class Avatar {
      * Charge l'image de l'avatar spécifié ou applique un repli sur bee.png en cas d'absence.
      */
     private void chargerImage() {
-        int avatar_size = 50; // Configuration globale à 50*50 pixels
+        int avatar_size = 20; // Configuration globale à 50*50 pixels
         try {
             String chemin = "../resources/" + this.typeAvatar + ".png";
             BufferedImage imageOriginale = ImageIO.read(getClass().getResource(chemin));
@@ -93,18 +93,18 @@ public class Avatar {
     public void miseAJour() {
         // Nettoyage et uniformisation de la vitesse (ici fixée à 10 pixels par tick)
         if (this.toucheGauche) {
-            x -= 10;
+            x -= 15;
             regardeADroite = false; 
         }
         if (this.toucheDroite) {
-            x += 10;
+            x += 15;
             regardeADroite = true; 
         }
         if (this.toucheUp) {
-            y -= 10;
+            y -= 15;
         }
         if (this.toucheDown) {
-            y += 10;
+            y += 15;
         }
 
         // Collisions adaptées dynamiquement aux dimensions réelles du sprite (50x50)
