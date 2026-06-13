@@ -181,7 +181,7 @@ public class JoueurSQL {
       List<Participant> liste = new ArrayList<>();
     try {
         PreparedStatement stmt = connexion.prepareStatement(
-            "SELECT id, nom, posX, posY, scoreSession FROM Joueur WHERE id != ?");
+            "SELECT id, nom, posX, posY, scoreSession, imposteur FROM Joueur WHERE id != ?");
         stmt.setInt(1, monId);
         ResultSet rs = stmt.executeQuery();
         while (rs.next()) {
@@ -191,6 +191,7 @@ public class JoueurSQL {
             j.setPosX(rs.getDouble("posX"));
             j.setPosY(rs.getDouble("posY"));
             j.setScoreSession(rs.getInt("scoreSession"));
+            j.setImposteur(rs.getBoolean("imposteur"));
             liste.add(j);
         }
         rs.close();

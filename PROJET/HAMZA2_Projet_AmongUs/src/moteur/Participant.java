@@ -90,4 +90,12 @@ public class Participant {
                 ", posY=" + posY +
                 '}';
     }
+    
+    public int calculpoint(int pointsFleur) {
+        this.scoreSession += pointsFleur;
+        if (this.scoreSession < 0) {
+            this.scoreSession = 0;
+        }
+        return pointsFleur;
+    }
 }

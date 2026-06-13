@@ -33,9 +33,9 @@ public class Fleur {
             spriteToxique = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
             Graphics2D g = spriteToxique.createGraphics();
             g.drawImage(spriteNormale, 0, 0, null);
-            //g.setColor(new java.awt.Color(255, 0, 0, 120));
-            //g.fillRect(0, 0, w, h);
-            //g.dispose();
+            g.setColor(new java.awt.Color(255, 0, 0, 120));
+            g.fillRect(0, 0, w, h);
+            g.dispose();
 
             spritesCharges = true;
         } catch (IOException ex) {

@@ -82,30 +82,35 @@ public class Jeu {
         
         // NOUVEAU : Timer de synchronisation avec la BDD (toutes les 100 ms)
         this.timerJoueurs = new Timer(100, (e) -> {
-            // 1. ÉTAPE CRUCIALE : On récupère d'abord le score personnel réel stocké localement
-            if (this.avatar.getParticipant() != null) {
-                int monScorePersoActuel = this.avatar.getParticipant().getScoreSession();
-                // 1. Envoyer notre position et notre score dans la BDD
+            int sommeEquipe = 0;
+
+            // joueur local
+            Participant moi = this.avatar.getParticipant();
+            if (moi != null) {
+                int monScorePersoActuel = moi.getScoreSession();
                 JoueurSql.mettreAJourPositionScore(monParticipantId, avatar.getX(), avatar.getY(), monScorePersoActuel);
-                
-                // 3. On met à jour notre variable locale d'affichage "this.score"
                 this.score = monScorePersoActuel;
-                
+
+                if (moi.isImposteur()) {
+                    sommeEquipe -= monScorePersoActuel;
+                } else {
+                    sommeEquipe += monScorePersoActuel;
+                }
             }
-            
-            //4. Récupérer la liste des autres joueurs actifs
-            
+
+            // autres joueurs
             List<Participant> tous = JoueurSql.getAutresParticipant(monParticipantId);
             autresParticipants.clear();
             autresParticipants.addAll(tous);
-            
-            // 4. CALCUL DU SCORE D'ÉQUIPE (Somme de tout le monde)
-            int sommeEquipe = this.score; // On commence avec nos points individuels
+
             for (Participant autre : tous) {
-                sommeEquipe += autre.getScoreSession(); // On ajoute les points de chaque autre joueur
+                if (autre.isImposteur()) {
+                    sommeEquipe -= autre.getScoreSession();
+                } else {
+                    sommeEquipe += autre.getScoreSession();
+                }
             }
-            
-            // 5. On stocke le résultat dans la variable d'équipe
+
             this.scoreEquipe = sommeEquipe;
             
             fleurs.clear();
@@ -152,26 +157,29 @@ public class Jeu {
         for (int i = fleurs.size() - 1; i >= 0; i--) {
             Fleur f = fleurs.get(i);
             if (collisionEntreAvatarEtFleur(f)) {
-                // Apply points to this player
-                int pointsGagnes = f.getPoints(); // +100, -100, or +200
-                this.score += pointsGagnes;
-                
-                if (avatar.getParticipant() != null) {
-                    int nouveau = avatar.getParticipant().getScoreSession() + pointsGagnes;
-                    avatar.getParticipant().setScoreSession(Math.max(0, nouveau)); // score never below 0
+
+                Participant p = avatar.getParticipant();
+                if (p != null) {
+                    int variationEquipe = p.calculpoint(f.getPoints());
+
+                    // score local affiché = score personnel réel du joueur local
+                    this.score = p.getScoreSession();
+
+                    // score équipe mis à jour localement
+                    this.scoreEquipe += variationEquipe;
                 }
-                // Remove from DB — all other clients will see it disappear on next sync
+
                 fleurSql.supprimerFleur(f);
                 fleurs.remove(i);
+
                 int nouveauType;
                 double hasard = Math.random();
-
-                // même logique que init : majorité normales, quelques toxiques
-                if (hasard < 0.7) {
-                    nouveauType = 1; // normale
+                if (hasard < 0.8) {
+                    nouveauType = 1;
                 } else {
-                    nouveauType = 2; // toxique
+                    nouveauType = 2;
                 }
+
                 Fleur nouvelleFleur = new Fleur(nouveauType);
                 nouvelleFleur.relancer(carte);
                 fleurSql.creerFleur(nouvelleFleur);
