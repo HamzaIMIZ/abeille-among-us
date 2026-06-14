@@ -132,7 +132,12 @@ public class Lobby extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
+        if (timer != null) {
+            timer.stop();        // stop refreshing the lobby
+        }
+        FenetreDeJeu jeu = new FenetreDeJeu(moi);
+        jeu.setVisible(true);
+        this.dispose();                          // close the lobby
     }//GEN-LAST:event_jButton1ActionPerformed
 
     /**

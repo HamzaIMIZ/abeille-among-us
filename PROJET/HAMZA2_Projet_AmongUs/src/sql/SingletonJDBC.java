@@ -26,7 +26,9 @@ public final class SingletonJDBC {
     private SingletonJDBC() {
         super();
         try {
-            this.connexion = DriverManager.getConnection("jdbc:mariadb://nemrod.ens2m.fr:3306/tp_jdbc", "etudiant", "YTDTvj9TR3CDYCmP");
+            this.connexion = DriverManager.getConnection(
+                    "jdbc:mariadb://nemrod.ens2m.fr:3306/2025-2026_s2_vs1_tp1_AbeilleAmongUs",
+                    "etudiant", "YTDTvj9TR3CDYCmP");
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(null, ex.getMessage());
             System.exit(-1);

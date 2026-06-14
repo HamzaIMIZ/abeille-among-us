@@ -32,12 +32,16 @@ public class FenetreDeJeu extends JFrame implements ActionListener, KeyListener 
     // NOUVEAU : le compte du joueur local (pour la fermeture)
     private Participant monCompte;
 
-    public FenetreDeJeu() {
-        // Initialisation de la fenêtre 
+    public FenetreDeJeu(Participant moi) {
+        // Le joueur existe déjà en base (créé dans Welcome/Lobby) :
+        // on le réutilise tel quel, sans en recréer un.
+        this.monCompte = moi;
+
+        // Initialisation de la fenêtre
         this.setSize(width, height);
         this.setResizable(true);
-        this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE); // appeler notre propre fermeture
-        this.setTitle("Abeille Among Us - Multijoueur");
+        this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        this.setTitle("Abeille Among Us - " + monCompte.getNom());
 
         this.jLabel1 = new JLabel();
         this.jLabel1.setPreferredSize(new java.awt.Dimension(width, height));
@@ -49,28 +53,7 @@ public class FenetreDeJeu extends JFrame implements ActionListener, KeyListener 
         this.jLabel1.setIcon(new ImageIcon(framebuffer));
         this.contexte = this.framebuffer.createGraphics();
 
-        // MULTIJOUEUR : création ou récupération du compte
-        // Dans un vrai jeu, on afficherait une boîte de dialogue pour le pseudo.
-        // Ici on choisit un nom fixe pour la démo (à changer pour chaque test).
-        String pseudo = "Participant_" + System.currentTimeMillis() % 1000; // pseudo unique à chaque lancement
-        String motDePasse = "mdp";
-
-        JoueurSQL JoueurSql = new JoueurSQL();
-        
-        boolean imposteurExiste = JoueurSql.existeDejaUnImposteur();
-       
-        if (!imposteurExiste) {
-            // S'il n'y en a pas, ce joueur devient l'imposteur 
-            this.monCompte = new Imposteur(0, pseudo, motDePasse); // we need to declare the variable mot de passe before
-            System.out.println("RÔLE : Vous êtes l'UNIQUE IMPOSTEUR !");
-        } else {
-            // Sinon, c'est une abeille (joueur normal) 
-            this.monCompte = new Joueur(0, pseudo, motDePasse);// we need to declare the variable mot de passe before
-            System.out.println("RÔLE : Vous êtes une ABEILLE.");
-        }
-        
-        JoueurSql.creerParticipant(this.monCompte);   // l'ID est automatiquement généré
-        System.out.println("Connecté en tant que " + monCompte.getNom() + " (ID=" + monCompte.getId() + ")");
+        System.out.println("Entré en jeu : " + monCompte.getNom() + " (ID=" + monCompte.getId() + ")");
 
         // Création du jeu multijoueur (on passe le compte)
         this.jeu = new Jeu(this.jLabel1.getWidth(), this.jLabel1.getHeight(), this.monCompte);
@@ -151,8 +134,15 @@ public class FenetreDeJeu extends JFrame implements ActionListener, KeyListener 
         // rien
     }
 
+//    public static void main(String[] args) {
+//        FenetreDeJeu fenetre = new FenetreDeJeu();
+//        fenetre.setVisible(true);
+//    }
     public static void main(String[] args) {
-        FenetreDeJeu fenetre = new FenetreDeJeu();
-        fenetre.setVisible(true);
+//        // Lancement solo pour tests (hors lobby)
+////        Participant test = new Participant("TestSolo");
+////        new sql.JoueurSQL().creerParticipant(test);   // crée une ligne pour le test
+//            FenetreDeJeu fenetre = new FenetreDeJeu();
+//            fenetre.setVisible(true);
     }
 }

@@ -16,38 +16,18 @@ import java.util.List;
 import java.util.ArrayList;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import moteur.Participant;
 
 public class JoueurSQL {
     
-    //Ok ! L'idée c'est que dans cette classe, tu implémentes TOUTES les actions posible avec la Table Participant (sur le serveur distant)
-    //Pour faire ça, déjà tu as besoin de pouvoir te connecter à la base de donnée, c'est pourquoi c'est judicieux de les mettre en 
-    //attributs les choses dont t'as besoin pour te connecter.
-    private String adresseBase;
-    private String user;
-    private String motdepasse;
     private Connection connexion; //lui c'est l'état de la connexion, autant en faire aussi un attribut.
     
     
-    //Ici, on fait un constructeur qui va juste initialiser l'intermédiaire SQL
-    public JoueurSQL(){
-        this.adresseBase = "jdbc:mariadb://nemrod.ens2m.fr:3306/2025-2026_s2_vs1_tp1_AbeilleAmongUs";
-        this.user = "etudiant";
-        this.motdepasse = "YTDTvj9TR3CDYCmP";
-	
-	//Vous avez vu que, avant de faire une requête, il fallait se connecter à la BD, ce que je te propose c'est de te connecter/déco UNE seule fois, et pas à 
-	//chaque fois que tu fais une requête : La connection à la BD prend du TEMPS, si tu fais plusieurs co/déco, ça va être long :)
-	try {
-	
-	this.connexion = DriverManager.getConnection(this.adresseBase, this.user, this.motdepasse);
-	
-	} catch (SQLException ex) {
-            ex.printStackTrace();
-        }
 
+    public JoueurSQL() {
+        this.connexion = SingletonJDBC.getInstance().getConnection();
     }
     
     //Je t'ai mis ici les 4 méthodes qui vont être importantes à coder, à toi de fustionner ça avec les bouts de code dans tes tests : 
@@ -161,18 +141,8 @@ public class JoueurSQL {
      
      
      
-     
-    public void closeTable(){
-       //On a lancé la connexion dans le Constructeur, il faut fermer donc la connexion quand tout est fini. Dans le jeu, il y a de fortes chance que tu le fasses quand tu supprimes tes Participants
-	// à priori quand le jeu est terminé. 
-        try {
-
-            this.connexion.close();
-
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
-
+  public void closeTable() {
+        // Connexion partagée (singleton) : on ne la ferme pas ici.
     }
     
  

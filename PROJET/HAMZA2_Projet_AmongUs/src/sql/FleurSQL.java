@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.ArrayList;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import moteur.Fleur;
@@ -29,23 +28,11 @@ public class FleurSQL {
     
     
     //Ici, on fait un constructeur qui va juste initialiser l'intermédiaire SQL
-    public FleurSQL(){
-        this.adresseBase = "jdbc:mariadb://nemrod.ens2m.fr:3306/2025-2026_s2_vs1_tp1_AbeilleAmongUs";
-        this.user = "etudiant";
-        this.motdepasse = "YTDTvj9TR3CDYCmP";
-	
-	//Vous avez vu que, avant de faire une requête, il fallait se connecter à la BD, ce que je te propose c'est de te connecter/déco UNE seule fois, et pas à 
-	//chaque fois que tu fais une requête : La connection à la BD prend du TEMPS, si tu fais plusieurs co/déco, ça va être long :)
-	try {
-	
-	this.connexion = DriverManager.getConnection(this.adresseBase, this.user, this.motdepasse);
-	
-	} catch (SQLException ex) {
-            ex.printStackTrace();
-        }
 
+
+    public FleurSQL() {
+        this.connexion = SingletonJDBC.getInstance().getConnection();
     }
-    
    public void creerFleur(Fleur J) {
 
        try {
@@ -170,6 +157,6 @@ public class FleurSQL {
     }
 
     public void closeTable() {
-        try { connexion.close(); } catch (SQLException ex) { ex.printStackTrace(); }
-    }
+        // Connexion partagée (singleton) : on ne la ferme pas ici.
 }
+    }
