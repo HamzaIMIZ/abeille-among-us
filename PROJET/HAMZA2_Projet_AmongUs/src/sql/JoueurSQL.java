@@ -201,6 +201,30 @@ public class JoueurSQL {
     }
     return liste;
     }
+//    methode pour le lobby qui montre tous les joueus actifs 
+    public List<Participant> getJoueursActifs() { 
+    List<Participant> liste = new ArrayList<>();
+    try {
+        PreparedStatement stmt = connexion.prepareStatement(
+            "SELECT id, nom, posX, posY, scoreSession, imposteur FROM Joueur WHERE actif = 1");
+        ResultSet rs = stmt.executeQuery();
+        while (rs.next()) {
+            Participant j = new Participant();
+            j.setId(rs.getInt("id"));
+            j.setNom(rs.getString("nom"));
+            j.setPosX(rs.getDouble("posX"));
+            j.setPosY(rs.getDouble("posY"));
+            j.setScoreSession(rs.getInt("scoreSession"));
+            j.setImposteur(rs.getBoolean("imposteur"));
+            liste.add(j);
+        }
+        rs.close();
+        stmt.close();
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return liste;
+}
 
 
     public void setActif(int id, boolean actif) {

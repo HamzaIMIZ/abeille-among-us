@@ -23,15 +23,14 @@ import moteur.Participant;
 public class Welcome extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(Welcome.class.getName());
-    private JoueurSQL joueurSQL; 
+
     /**
      * Creates new form Welcome
      */
     public Welcome() {
         initComponents();
-        
-      
     }
+    
     @Override
     public void paint(Graphics g) {
         super.paint(g);
@@ -52,59 +51,47 @@ public class Welcome extends javax.swing.JFrame {
     private void initComponents() {
 
         jButton1 = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        jButton1.setBackground(new java.awt.Color(204, 255, 255));
-        jButton1.setText("Join a party");
+        jButton1.setText("Join a party!");
         jButton1.addActionListener(this::jButton1ActionPerformed);
-
-        jButton2.setBackground(new java.awt.Color(204, 255, 255));
-        jButton2.setText("Create a party");
-        jButton2.addActionListener(this::jButton2ActionPerformed);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addGap(285, 285, 285)
-                .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, 167, Short.MAX_VALUE)
-                .addGap(29, 29, 29)
-                .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, 192, Short.MAX_VALUE)
-                .addGap(202, 202, 202))
+            .addGroup(layout.createSequentialGroup()
+                .addGap(246, 246, 246)
+                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(275, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addGap(519, 519, 519)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(48, 48, 48))
+                .addContainerGap(397, Short.MAX_VALUE)
+                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(66, 66, 66))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-    String name = JOptionPane.showInputDialog(null, "What's your bee-Name? ");
-    if (name!= null) {
-    System.out.println("player name" + name);
-    String ID = JOptionPane.showInputDialog(null, "Join your friends with a party ID!");
-    if (ID!=null) {
-    System.out.println("party ID" + ID);
-    Participant j= new Participant(name);
-    JoueurSQL J= new JoueurSQL();
-    J.creerParticipant(j);
-    
-            }
+        String name = JOptionPane.showInputDialog(null, "What's your bee-Name? ");
+        if (name != null) {
+            System.out.println("player name" + name);
+            //    String ID = JOptionPane.showInputDialog(null, "Join your friends with a party ID!");
+            //    if (ID!=null) {
+                //    System.out.println("party ID" + ID);
+                Participant j = new Participant(name);
+                JoueurSQL J = new JoueurSQL();
+                J.creerParticipant(j);
+                J.setActif(j.getId(), true);
+                new Lobby(j).setVisible(true);
+                this.dispose();
+            }//GEN-LAST:event_jButton1ActionPerformed
     }//GEN-LAST:event_jButton1ActionPerformed
-    }
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jButton2ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -133,6 +120,5 @@ public class Welcome extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
     // End of variables declaration//GEN-END:variables
 }
