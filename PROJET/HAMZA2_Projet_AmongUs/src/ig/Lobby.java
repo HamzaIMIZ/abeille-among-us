@@ -141,8 +141,10 @@ public class Lobby extends javax.swing.JFrame {
     if (!sqlRole.existeDejaUnImposteur()) {
         moi.setImposteur(true);
         sqlRole.modifierParticipant(moi);   // write imposteur=1 to the DB
+        sqlRole.demarrerChronoPartie();
         JOptionPane.showMessageDialog(this,
             "You are the IMPOSTER! Steal the nectar and don't get caught!");
+        
     } else {
         moi.setImposteur(false);
         JOptionPane.showMessageDialog(this,

@@ -27,7 +27,7 @@ public class Jeu {
     private Camera camera;
     private int score;
     private int scoreEquipe;
-    private int cyclesChrono = 0; // chrono + vote
+    //private int cyclesChrono = 0; // chrono + vote
     private boolean phaseVoteLancee = false; // chrono + vote
     private final int LARGEUR_CARTE = 3904;
     private final int HAUTEUR_CARTE = 1968;
@@ -116,12 +116,31 @@ public class Jeu {
             
             fleurs.clear();
             fleurs.addAll(fleurSql.getToutesFleurs());
-        });
+        // ... fin de la mise à jour des autres joueurs ...
+
+    fleurs.clear();
+    fleurs.addAll(fleurSql.getToutesFleurs());
+
+    // NOUVEAU : On interroge le serveur SQL pour connaître le temps écoulé réel
+    int tempsEcoule = JoueurSql.getTempsEcoule();
+    
+    // Si 60 secondes sont écoulées, on arrête tout
+    if (tempsEcoule >= 60 && !phaseVoteLancee) {
+        phaseVoteLancee = true;
+        this.timerJoueurs.stop();
+        this.timerFleurs.stop();
+        lancerSondage();
+    }
+    });
         
         this.timerFleurs = new Timer(1200, (e) -> {
             fleurs.clear();
             fleurs.addAll(fleurSql.getToutesFleurs());
         });
+        
+        
+        
+        
         this.timerJoueurs.start();
         this.timerFleurs.start();
     }
@@ -192,13 +211,13 @@ public class Jeu {
         
         // Systeme chrono + vote
         
-        this.cyclesChrono++;
+        //this.cyclesChrono++;
     
         // Si 1 minute est passée (1500 cycles de 40ms)
-        if (this.cyclesChrono >= 1500 && !phaseVoteLancee) {
-            phaseVoteLancee = true;
-            this.timerJoueurs.stop(); // On arrête la synchronisation des mouvements et scores
-            this.timerFleurs.stop();
+        //if (this.cyclesChrono >= 1500 && !phaseVoteLancee) {
+          //  phaseVoteLancee = true;
+            //this.timerJoueurs.stop(); // On arrête la synchronisation des mouvements et scores
+            //this.timerFleurs.stop();
          //   boolean scoreValide = (this.scoreEquipe >= 50);
 
           //  if (!scoreValide) {
@@ -215,8 +234,8 @@ public class Jeu {
             
 
             // Dans les deux cas, on va au vote, et on transmet si le score était bon ou pas
-            lancerSondage();
-        }
+            //lancerSondage();
+        //}
     }
 
     public void rendu(Graphics2D contexte) {
@@ -450,7 +469,7 @@ public class Jeu {
 
             fleurs.clear();
             fleurs.addAll(fleurSql.getToutesFleurs());
-            System.out.println("Fleurs chargées en mémoire : " + fleurs.size()); // ← ADD THIS
+            System.out.println("Fleurs chargées en mémoire : " + fleurs.size()); // 
     }
     
 }

@@ -304,4 +304,33 @@ public class JoueurSQL {
     }
     return score;
     }
+    
+    //  Met à jour l'heure de début de la partie avec l'heure exacte du serveur
+public void demarrerChronoPartie() {
+    try {
+        PreparedStatement req = connexion.prepareStatement("UPDATE Partie SET heure_debut = NOW() WHERE id = 1");
+        req.executeUpdate();
+        req.close();
+    } catch (SQLException ex) {
+        ex.printStackTrace();
+    }
+}
+
+//  Calcule la différence en secondes entre l'heure de début et l'heure actuelle
+public int getTempsEcoule() {
+    int secondes = 0;
+    try {
+        // TIMESTAMPDIFF permet à SQL de calculer l'écart en secondes directement
+        PreparedStatement req = connexion.prepareStatement("SELECT TIMESTAMPDIFF(SECOND, heure_debut, NOW()) AS sec FROM Partie WHERE id = 1");
+        ResultSet rs = req.executeQuery();
+        if (rs.next()) {
+            secondes = rs.getInt("sec");
+        }
+        rs.close();
+        req.close();
+    } catch (SQLException ex) {
+        ex.printStackTrace();
+    }
+    return secondes;
+    }
 }
