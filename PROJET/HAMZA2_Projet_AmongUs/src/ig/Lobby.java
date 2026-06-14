@@ -11,6 +11,7 @@ import javax.swing.DefaultListModel;
 import javax.swing.Timer;
 import moteur.Participant;
 import sql.JoueurSQL;
+import javax.swing.JOptionPane;
 /**
  *
  * @author Imane
@@ -132,12 +133,25 @@ public class Lobby extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        if (timer != null) {
-            timer.stop();        // stop refreshing the lobby
-        }
-        FenetreDeJeu jeu = new FenetreDeJeu(moi);
-        jeu.setVisible(true);
-        this.dispose();                          // close the lobby
+    if (timer != null) timer.stop();   // stop refreshing the lobby
+
+    JoueurSQL sqlRole = new JoueurSQL();
+
+    // Claim the imposter role if nobody has it yet
+    if (!sqlRole.existeDejaUnImposteur()) {
+        moi.setImposteur(true);
+        sqlRole.modifierParticipant(moi);   // write imposteur=1 to the DB
+        JOptionPane.showMessageDialog(this,
+            "You are the IMPOSTER! Steal the nectar and don't get caught!");
+    } else {
+        moi.setImposteur(false);
+        JOptionPane.showMessageDialog(this,
+            "You are a good bee! Start collecting — Bzzz!");
+    }
+
+    FenetreDeJeu jeu = new FenetreDeJeu(moi);
+    jeu.setVisible(true);
+    this.dispose();
     }//GEN-LAST:event_jButton1ActionPerformed
 
     /**

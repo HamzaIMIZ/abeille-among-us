@@ -133,16 +133,17 @@ public class FenetreDeJeu extends JFrame implements ActionListener, KeyListener 
     public void keyTyped(KeyEvent e) {
         // rien
     }
+    }
 
 //    public static void main(String[] args) {
 //        FenetreDeJeu fenetre = new FenetreDeJeu();
 //        fenetre.setVisible(true);
 //    }
-    public static void main(String[] args) {
-//        // Lancement solo pour tests (hors lobby)
-////        Participant test = new Participant("TestSolo");
-////        new sql.JoueurSQL().creerParticipant(test);   // crée une ligne pour le test
-//            FenetreDeJeu fenetre = new FenetreDeJeu();
-//            fenetre.setVisible(true);
-    }
-}
+//    public static void main(String[] args) {
+////        // Lancement solo pour tests (hors lobby)
+//////        Participant test = new Participant("TestSolo");
+//////        new sql.JoueurSQL().creerParticipant(test);   // crée une ligne pour le test
+////            FenetreDeJeu fenetre = new FenetreDeJeu();
+////            fenetre.setVisible(true);
+//    }
+//}
