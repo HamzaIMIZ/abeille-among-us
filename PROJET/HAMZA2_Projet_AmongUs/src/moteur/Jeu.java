@@ -429,8 +429,8 @@ public class Jeu {
             int nb = fleurSql.compterFleurs();
             System.out.println("Fleurs dans la BDD au démarrage : " + nb);
 
-            if (nb < 10) {
-                int aCreer = 10 - nb;
+            if (nb < 20) {
+                int aCreer = 20 - nb;
                 System.out.println("Création de " + aCreer + " fleurs...");
                 for (int i = 0; i < (int)(aCreer * 0.7); i++) {
                     Fleur f = new Fleur(1);
