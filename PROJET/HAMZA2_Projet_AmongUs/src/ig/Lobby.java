@@ -6,6 +6,11 @@ package ig;
 import java.awt.Graphics;
 import javax.swing.ImageIcon;
 import moteur.Participant;
+import java.util.List;
+import javax.swing.DefaultListModel;
+import javax.swing.Timer;
+import moteur.Participant;
+import sql.JoueurSQL;
 /**
  *
  * @author Imane
@@ -13,8 +18,12 @@ import moteur.Participant;
 
 public class Lobby extends javax.swing.JFrame {
 
-    private Participant moi;   // who I am, passed from Welcome
+    // who I am, passed from Welcome
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(Lobby.class.getName());
+    private Participant moi;   // who I am, passed from Welcome
+    private DefaultListModel<String> model = new DefaultListModel<>();   
+    private JoueurSQL sql = new JoueurSQL();                             
+    private Timer timer;                                                
 
     /**
      * Creates new form Lobby
@@ -23,11 +32,25 @@ public class Lobby extends javax.swing.JFrame {
     public Lobby() {
         initComponents();
     }
-
-    public Lobby(Participant moi) {   // add this one
+    public Lobby(Participant moi) {
         initComponents();
         this.moi = moi;
-        setTitle("Lobby - " + moi.getNom());   // quick visual proof it received you
+        setTitle("Lobby - " + moi.getNom());
+
+        jList1.setModel(model);          // connect the list to our model
+        jButton1.setEnabled(false);      // Start greyed out until >= 3
+
+        rafraichir();                    // fill once right away
+        timer = new Timer(200, e -> rafraichir());
+        timer.start();
+    }
+    private void rafraichir() {
+        List<Participant> actifs = sql.getJoueursActifs();
+        model.clear();
+        for (Participant p : actifs) {
+            model.addElement(p.getNom());
+        }
+        jButton1.setEnabled(model.size() >= 3);
     }
     /**
      * This method is called from within the constructor to initialize the form.
@@ -40,7 +63,6 @@ public class Lobby extends javax.swing.JFrame {
 
         jScrollPane1 = new javax.swing.JScrollPane();
         jList1 = new javax.swing.JList<>();
-        jProgressBar1 = new javax.swing.JProgressBar();
         jScrollPane4 = new javax.swing.JScrollPane();
         jTextArea3 = new javax.swing.JTextArea();
         jLabel1 = new javax.swing.JLabel();
@@ -50,7 +72,7 @@ public class Lobby extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
         jList1.setModel(new javax.swing.AbstractListModel<String>() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
+            String[] strings = {};
             public int getSize() { return strings.length; }
             public String getElementAt(int i) { return strings[i]; }
         });
@@ -84,9 +106,7 @@ public class Lobby extends javax.swing.JFrame {
                             .addComponent(jScrollPane1)))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(228, 228, 228)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 178, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jProgressBar1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 178, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(276, 276, 276)
                         .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 66, javax.swing.GroupLayout.PREFERRED_SIZE)))
@@ -99,9 +119,7 @@ public class Lobby extends javax.swing.JFrame {
                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jProgressBar1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 67, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 83, Short.MAX_VALUE)
                 .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 17, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -147,7 +165,6 @@ public class Lobby extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JList<String> jList1;
-    private javax.swing.JProgressBar jProgressBar1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JTextArea jTextArea3;

@@ -87,10 +87,9 @@ public class Welcome extends javax.swing.JFrame {
                 Participant j = new Participant(name);
                 JoueurSQL J = new JoueurSQL();
                 J.creerParticipant(j);
-                J.setActif(j.getId(), true);
                 new Lobby(j).setVisible(true);
                 this.dispose();
-            }//GEN-LAST:event_jButton1ActionPerformed
+            }                                        
     }//GEN-LAST:event_jButton1ActionPerformed
 
     /**

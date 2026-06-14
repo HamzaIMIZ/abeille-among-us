@@ -39,8 +39,9 @@ public class Participant {
     public Participant() {
         this(0, "", "");
     }
-     public Participant(String nom) {
-        this.nom = nom;
+
+    public Participant(String nom) {
+        this(0, nom, "");
     }
      
      
