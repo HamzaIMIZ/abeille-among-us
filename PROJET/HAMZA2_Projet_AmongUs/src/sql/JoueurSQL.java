@@ -284,4 +284,24 @@ public class JoueurSQL {
         }
         return liste;
     }  
+    
+    // Sert a faire la comparaison des scores des joueurs pour décider le gagnant
+    
+    public int getScoreImposteur() {
+    int score = 0;
+    try {
+        PreparedStatement stmt = connexion.prepareStatement(
+            "SELECT scoreSession FROM Joueur WHERE imposteur = 1 LIMIT 1"
+        );
+        ResultSet rs = stmt.executeQuery();
+        if (rs.next()) {
+            score = rs.getInt("scoreSession");
+        }
+        rs.close();
+        stmt.close();
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return score;
+    }
 }
