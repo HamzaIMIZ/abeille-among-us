@@ -78,6 +78,7 @@ public class Avatar {
             return;
         }
 
+        int distanceSecurite = 60; // Distance d'évitement entre deux joueurs
         boolean positionValide = false;
         int tentatives = 0;
 
